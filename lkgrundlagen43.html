@@ -1,0 +1,516 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Russisch Vokabeltrainer - Verben & Substantive</title>
+    <style>
+        :root {
+            --primary-color: #2e7d32;      /* Dunkles Grün */
+            --primary-light: #4caf50;      /* Mittleres Grün */
+            --primary-dark: #1b5e20;       /* Sehr dunkles Grün */
+            --accent-color: #81c784;       /* Helles Grün für Akzente */
+            --bg-color: #e8f5e9;           /* Sehr helles Grün für Hintergrund */
+            --card-bg: #ffffff;            /* Kartenhintergrund */
+            --text-color: #333333;
+            --text-light: #666666;
+            --card-ratio: 1.5;             /* Verhältnis Höhe/Breite */
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        h1 {
+            color: var(--primary-dark);
+            margin-bottom: 20px;
+            text-align: center;
+            font-size: 1.8rem;
+        }
+
+        /* Hauptcontainer */
+        .container {
+            width: 100%;
+            max-width: 800px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+        }
+
+        /* Fortschrittsanzeige */
+        .progress-container {
+            font-size: 1.1rem;
+            font-weight: bold;
+            color: var(--primary-dark);
+            background: rgba(255, 255, 255, 0.8);
+            padding: 5px 15px;
+            border-radius: 15px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+
+        /* Karteikarten-Bereich (Scene) */
+        .card-scene {
+            width: 100%;
+            max-width: 600px;
+            height: 350px;
+            perspective: 1000px; /* Wichtig für 3D Effekt */
+            margin: 10px 0;
+        }
+
+        /* Die Karte selbst */
+        .card {
+            width: 100%;
+            height: 100%;
+            position: relative;
+            transform-style: preserve-3d;
+            transition: transform 0.6s cubic-bezier(0.4, 0.2, 0.2, 1);
+            cursor: pointer;
+            border-radius: 15px;
+            box-shadow: 0 10px 25px rgba(46, 125, 50, 0.2);
+        }
+
+        /* Klasse für den gedrehten Zustand */
+        .card.is-flipped {
+            transform: rotateY(180deg);
+        }
+
+        /* Gemeinsame Styles für Vorder- und Rückseite */
+        .card__face {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            backface-visibility: hidden; /* Rückseite unsichtbar machen */
+            -webkit-backface-visibility: hidden;
+            border-radius: 15px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            text-align: center;
+            background-color: var(--card-bg);
+            border: 2px solid var(--primary-light);
+            overflow: hidden;
+        }
+
+        /* Vorderseite */
+        .card__face--front {
+            background: linear-gradient(135deg, #ffffff 0%, #f1f8e9 100%);
+        }
+
+        /* Rückseite (gedreht) */
+        .card__face--back {
+            background: linear-gradient(135deg, #f1f8e9 0%, #dcedc8 100%);
+            transform: rotateY(180deg);
+        }
+
+        /* Text-Styling auf der Karte */
+        .card-content {
+            font-size: 1.8rem;
+            color: var(--text-color);
+            line-height: 1.4;
+            font-weight: 500;
+            transition: font-size 0.2s;
+        }
+
+        /* Label für Vorder-/Rückseite (optional) */
+        .card-label {
+            position: absolute;
+            top: 15px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            color: var(--primary-light);
+        }
+
+        /* Dynamische Schriftgrößen */
+        .text-medium { font-size: 1.4rem; }
+        .text-small { font-size: 1.1rem; }
+        .text-tiny { font-size: 0.9rem; }
+
+        /* Steuerungselemente */
+        .controls {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 15px;
+            width: 100%;
+        }
+
+        .btn {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn:hover {
+            background-color: var(--primary-dark);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 10px rgba(0,0,0,0.15);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        .btn-secondary {
+            background-color: var(--primary-light);
+        }
+        
+        .btn-secondary:hover {
+            background-color: var(--primary-color);
+        }
+
+        .shortcuts-info {
+            margin-top: 30px;
+            font-size: 0.85rem;
+            color: var(--text-light);
+            text-align: center;
+            background-color: rgba(255,255,255,0.5);
+            padding: 10px;
+            border-radius: 8px;
+        }
+
+        /* Tastenkürzel Icons */
+        kbd {
+            background-color: #eee;
+            border-radius: 3px;
+            border: 1px solid #b4b4b4;
+            box-shadow: 0 1px 1px rgba(0,0,0,.2), 0 2px 0 0 rgba(255,255,255,.7) inset;
+            color: #333;
+            display: inline-block;
+            font-size: .85em;
+            font-weight: 700;
+            line-height: 1;
+            padding: 2px 4px;
+            white-space: nowrap;
+        }
+
+        /* Responsive Anpassungen */
+        @media (max-width: 600px) {
+            h1 { font-size: 1.5rem; }
+            .card-scene { height: 300px; }
+            .card-content { font-size: 1.4rem; }
+            .controls { gap: 10px; }
+            .btn { padding: 10px 16px; font-size: 0.9rem; flex: 1 1 40%; justify-content: center; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>Russisch Vokabeltrainer</h1>
+        
+        <div class="progress-container">
+            Karte <span id="current-index">1</span> von <span id="total-count">95</span>
+        </div>
+
+        <div class="card-scene">
+            <div class="card" id="flashcard">
+                <!-- Vorderseite -->
+                <div class="card__face card__face--front">
+                    <div class="card-label">Russisch</div>
+                    <div class="card-content" id="front-text">
+                        Lade Daten...
+                    </div>
+                </div>
+                <!-- Rückseite -->
+                <div class="card__face card__face--back">
+                    <div class="card-label">Deutsch</div>
+                    <div class="card-content" id="back-text">
+                        ...
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="controls">
+            <button class="btn btn-secondary" id="btn-prev">← Vorherige</button>
+            <button class="btn" id="btn-shuffle">Mischen 🔀</button>
+            <button class="btn" id="btn-reset">An den Anfang ↺</button>
+            <button class="btn btn-secondary" id="btn-next">Nächste →</button>
+        </div>
+
+        <div class="shortcuts-info">
+            <p>Tastatursteuerung: <kbd>Leertaste</kbd> / <kbd>Enter</kbd> = Drehen | <kbd>←</kbd> / <kbd>→</kbd> = Navigation | <kbd>Pos1</kbd> = Anfang</p>
+        </div>
+    </div>
+
+    <script>
+        // Datenbasis aus der Anforderung
+        const rawVocabulary = [
+            { front: "чита́ть (NSB) / прочита́ть (SB)", back: "lesen / durchlesen" },
+            { front: "почи́тывать (NSB) / почита́ть (SB)", back: "ein wenig lesen / ab und zu lesen" },
+            { front: "перечи́тывать (NSB) / перечита́ть (SB)", back: "noch einmal lesen / wiederlesen" },
+            { front: "дочи́тывать (NSB) / дочита́ть (SB)", back: "zu Ende lesen / bis zum Schluss lesen" },
+            { front: "вычи́тывать (NSB) / вы́читать (SB)", back: "etwas herauslesen (eine Information finden) / Korrektur lesen" },
+            { front: "зачи́тывать (NSB) / зачита́ть (SB)", back: "vorlesen / (offiziell) verkünden" },
+            { front: "начи́тывать (NSB) / начита́ть (SB)", back: "(einen Text auf Audio) aufsprechen / einsprechen" },
+            { front: "счи́тывать (NSB) / счита́ть (SB)", back: "(Daten) einlesen / scannen / ablesen" },
+            { front: "отчи́тывать (NSB) / отчита́ть (SB)", back: "jemanden ausschimpfen / zurechtweisen" },
+            { front: "зачи́тываться (NSB) / зачита́ться (SB)", back: "sich festlesen / sich vertiefen (und die Zeit vergessen)" },
+            { front: "начи́тываться (NSB) / начита́ться (SB)", back: "sich sattlesen / genug von etwas gelesen haben" },
+            { front: "вчи́тываться (NSB) / вчита́ться (SB)", back: "sich einlesen / sich (gedanklich) in einen Text vertiefen" },
+            { front: "отчи́тываться (NSB) / отчита́ться (SB)", back: "Bericht erstatten / Rechenschaft ablegen" },
+            { front: "подпи́сывать (NSB) / подписа́ть (SB)", back: "unterschreiben" },
+            { front: "исправля́ть (NSB) / испра́вить (SB)", back: "korrigieren / verbessern" },
+            { front: "опа́здывать (NSB) / опозда́ть (SB)", back: "sich verspäten / zu spät kommen" },
+            { front: "находи́ть (NSB) / найти́ (SB)", back: "finden" },
+            { front: "разбива́ть (NSB) / разби́ть (SB)", back: "zerbrechen / zerschlagen" },
+            { front: "повторя́ть (NSB) / повтори́ть (SB)", back: "wiederholen" },
+            { front: "кни́га", back: "das Buch" },
+            { front: "газе́та", back: "die Zeitung" },
+            { front: "журна́л", back: "die Zeitschrift / das Magazin" },
+            { front: "статья́", back: "der Artikel" },
+            { front: "рома́н", back: "der Roman" },
+            { front: "ска́зка", back: "das Märchen" },
+            { front: "текст", back: "der Text" },
+            { front: "докуме́нт", back: "das Dokument" },
+            { front: "догово́р", back: "der Vertrag" },
+            { front: "прика́з", back: "der Befehl / der Erlass" },
+            { front: "ука́з", back: "der Erlass / das Dekret" },
+            { front: "пригово́р", back: "das Urteil (Gericht)" },
+            { front: "письмо́", back: "der Brief" },
+            { front: "сообще́ние", back: "die Nachricht / die Mitteilung" },
+            { front: "информа́ция", back: "die Information" },
+            { front: "факт", back: "der Fakt / die Tatsache" },
+            { front: "дета́ль (f)", back: "das Detail" },
+            { front: "пункт", back: "der Punkt (in einem Vertrag)" },
+            { front: "оши́бка", back: "der Fehler" },
+            { front: "глава́", back: "das Kapitel" },
+            { front: "страни́ца", back: "die Seite" },
+            { front: "цита́та", back: "das Zitat" },
+            { front: "но́вости (Pl.)", back: "die Nachrichten" },
+            { front: "а́удиокни́га", back: "das Hörbuch" },
+            { front: "а́втор", back: "der Autor" },
+            { front: "реда́ктор", back: "der Redakteur" },
+            { front: "ди́ктор", back: "der Sprecher / Ansager" },
+            { front: "актёр", back: "der Schauspieler" },
+            { front: "чита́тель", back: "der Leser" },
+            { front: "учи́тель", back: "der Lehrer" },
+            { front: "учени́к", back: "der Schüler" },
+            { front: "оте́ц", back: "der Vater" },
+            { front: "сын", back: "der Sohn" },
+            { front: "офице́р", back: "der Offizier" },
+            { front: "президе́нт", back: "der Präsident" },
+            { front: "до́ктор", back: "der Arzt / der Doktor" },
+            { front: "друг", back: "der Freund" },
+            { front: "вре́мя", back: "die Zeit" },
+            { front: "час", back: "die Stunde" },
+            { front: "у́жин", back: "das Abendessen" },
+            { front: "кино́", back: "das Kino" },
+            { front: "диктофо́н", back: "das Diktiergerät" },
+            { front: "микрофо́н", back: "das Mikrofon" },
+            { front: "плёнка", back: "das Band / der Film (Tonband)" },
+            { front: "ска́нер", back: "der Scanner" },
+            { front: "код", back: "der Code" },
+            { front: "штрих-ко́д", back: "der Barcode" },
+            { front: "ва́за", back: "die Vase" },
+            { front: "вы́боры (Pl.)", back: "die Wahlen" },
+            { front: "очки́ (Pl.)", back: "die Brille" },
+            { front: "интере́сный", back: "interessant" },
+            { front: "ску́чный", back: "langweilig" },
+            { front: "люби́мый", back: "lieblings- / geliebt" },
+            { front: "ва́жный", back: "wichtig" },
+            { front: "поле́зный", back: "nützlich" },
+            { front: "плохо́й", back: "schlecht" },
+            { front: "ста́рый", back: "alt" },
+            { front: "после́дний", back: "letzter" },
+            { front: "ме́лкий", back: "klein / fein (z.B. Schrift)" },
+            { front: "гро́мкий", back: "laut" },
+            { front: "стро́гий", back: "streng" },
+            { front: "гру́стный", back: "traurig" },
+            { front: "гото́вый", back: "bereit / fertig" },
+            { front: "внима́тельно", back: "aufmerksam" },
+            { front: "гро́мко", back: "laut (Adverb)" },
+            { front: "до́лго", back: "lange" },
+            { front: "наконе́ц", back: "endlich / schließlich" },
+            { front: "сно́ва / опя́ть", back: "wieder / erneut" },
+            { front: "вслух", back: "laut (vorlesen)" },
+            { front: "до конца́", back: "bis zum Ende" },
+            { front: "пе́ред сном", back: "vor dem Schlafen" },
+            { front: "ка́ждый день / ве́чер", back: "jeden Tag / Abend" },
+            { front: "весь день", back: "den ganzen Tag" },
+            { front: "вдруг", back: "plötzlich" },
+            { front: "сра́зу", back: "sofort" },
+            { front: "обяза́тельно", back: "unbedingt" }
+        ];
+
+        // Status-Variablen
+        let deck = [...rawVocabulary]; // Kopie zum Arbeiten
+        let currentIndex = 0;
+        let isFlipped = false;
+
+        // DOM Elemente
+        const cardElement = document.getElementById('flashcard');
+        const frontText = document.getElementById('front-text');
+        const backText = document.getElementById('back-text');
+        const currentIndexEl = document.getElementById('current-index');
+        const totalCountEl = document.getElementById('total-count');
+
+        // Initialisierung
+        function init() {
+            totalCountEl.textContent = deck.length;
+            showCard(0);
+        }
+
+        // Karte anzeigen
+        function showCard(index) {
+            // Indizes sicherstellen
+            if (index < 0) index = 0;
+            if (index >= deck.length) index = deck.length - 1;
+
+            currentIndex = index;
+            const item = deck[currentIndex];
+
+            // Karte zurückdrehen, falls sie gedreht ist
+            if (isFlipped) {
+                cardElement.classList.remove('is-flipped');
+                isFlipped = false;
+                
+                // Kurze Verzögerung für den Textwechsel, damit man es nicht während des Drehens sieht
+                setTimeout(() => {
+                    updateCardContent(item);
+                }, 300);
+            } else {
+                updateCardContent(item);
+            }
+            
+            currentIndexEl.textContent = currentIndex + 1;
+        }
+
+        // Inhalt aktualisieren und Schriftgröße anpassen
+        function updateCardContent(item) {
+            frontText.textContent = item.front;
+            backText.textContent = item.back;
+            
+            adjustFontSize(frontText, item.front);
+            adjustFontSize(backText, item.back);
+        }
+
+        // Schriftgröße dynamisch anpassen
+        function adjustFontSize(element, text) {
+            element.classList.remove('text-medium', 'text-small', 'text-tiny');
+            if (text.length > 80) {
+                element.classList.add('text-tiny');
+            } else if (text.length > 50) {
+                element.classList.add('text-small');
+            } else if (text.length > 25) {
+                element.classList.add('text-medium');
+            }
+        }
+
+        // Karte drehen
+        function flipCard() {
+            isFlipped = !isFlipped;
+            cardElement.classList.toggle('is-flipped');
+        }
+
+        // Navigation
+        function nextCard() {
+            if (currentIndex < deck.length - 1) {
+                showCard(currentIndex + 1);
+            } else {
+                // Optional: Loop zum Anfang
+                // showCard(0);
+                
+                // Visuelles Feedback am Ende (kurzes Wackeln)
+                cardElement.animate([
+                    { transform: isFlipped ? 'rotateY(180deg) translateX(0)' : 'translateX(0)' },
+                    { transform: isFlipped ? 'rotateY(180deg) translateX(10px)' : 'translateX(10px)' },
+                    { transform: isFlipped ? 'rotateY(180deg) translateX(0)' : 'translateX(0)' }
+                ], { duration: 200 });
+            }
+        }
+
+        function prevCard() {
+            if (currentIndex > 0) {
+                showCard(currentIndex - 1);
+            } else {
+                // Visuelles Feedback am Anfang
+                cardElement.animate([
+                    { transform: isFlipped ? 'rotateY(180deg) translateX(0)' : 'translateX(0)' },
+                    { transform: isFlipped ? 'rotateY(180deg) translateX(-10px)' : 'translateX(-10px)' },
+                    { transform: isFlipped ? 'rotateY(180deg) translateX(0)' : 'translateX(0)' }
+                ], { duration: 200 });
+            }
+        }
+
+        // Mischen (Fisher-Yates)
+        function shuffleDeck() {
+            for (let i = deck.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [deck[i], deck[j]] = [deck[j], deck[i]];
+            }
+            showCard(0);
+        }
+
+        // Zurück zum Anfang (ohne Ent-Mischen)
+        function resetToStart() {
+            showCard(0);
+        }
+
+        // Event Listeners (Maus/Touch)
+        document.getElementById('btn-next').addEventListener('click', nextCard);
+        document.getElementById('btn-prev').addEventListener('click', prevCard);
+        document.getElementById('btn-shuffle').addEventListener('click', shuffleDeck);
+        document.getElementById('btn-reset').addEventListener('click', resetToStart);
+        
+        // Klick auf die Karte dreht sie um
+        cardElement.addEventListener('click', flipCard);
+
+        // Event Listeners (Tastatur)
+        document.addEventListener('keydown', (e) => {
+            // Verhindern, dass Space/Enter Buttons auslösen, wenn diese den Fokus haben (optional)
+            // e.preventDefault() hier würde das Scrollen mit Space verhindern, was gewünscht sein kann.
+            
+            switch (e.key) {
+                case ' ':
+                case 'Enter':
+                    e.preventDefault(); // Verhindert Scrollen bei Leertaste
+                    flipCard();
+                    break;
+                case 'ArrowRight':
+                    nextCard();
+                    break;
+                case 'ArrowLeft':
+                    prevCard();
+                    break;
+                case 'Home':
+                    e.preventDefault();
+                    resetToStart();
+                    break;
+            }
+        });
+
+        // App starten
+        init();
+
+    </script>
+</body>
+</html>
