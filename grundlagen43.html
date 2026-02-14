@@ -1,0 +1,750 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Russisch Grammatik: Verben des Lesens mit Präfixen</title>
+    <!-- Polyfill für Touch-Geräte -->
+    <script src="https://cdn.jsdelivr.net/npm/drag-drop-touch@1.3.1/DragDropTouch.js"></script>
+    <style>
+        :root {
+            --primary-color: #2c3e50;
+            --accent-color: #3498db;
+            --success-color: #27ae60;
+            --error-color: #c0392b;
+            --bg-color: #f4f7f6;
+            --card-bg: #ffffff;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            background-color: var(--bg-color);
+            color: #333;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            text-align: center;
+            color: var(--primary-color);
+            margin-bottom: 30px;
+        }
+
+        .intro-card {
+            background: var(--card-bg);
+            padding: 25px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
+            border-left: 5px solid var(--accent-color);
+        }
+
+        .intro-card table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+        }
+
+        .intro-card th, .intro-card td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+
+        .intro-card th {
+            background-color: #eee;
+        }
+
+        .exercise {
+            background: var(--card-bg);
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            margin-bottom: 25px;
+            border: 1px solid #e1e1e1;
+            position: relative;
+        }
+
+        .exercise-header {
+            font-weight: bold;
+            margin-bottom: 15px;
+            color: var(--accent-color);
+            text-transform: uppercase;
+            font-size: 0.9em;
+            letter-spacing: 1px;
+        }
+
+        .instruction {
+            margin-bottom: 15px;
+            font-style: italic;
+            color: #555;
+        }
+
+        .controls {
+            margin-top: 20px;
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+            border-top: 1px solid #eee;
+            padding-top: 15px;
+        }
+
+        button {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: background 0.2s;
+            font-size: 0.85rem;
+        }
+
+        .btn-reset { background-color: #95a5a6; color: white; }
+        .btn-reset:hover { background-color: #7f8c8d; }
+
+        .btn-solve { background-color: #f39c12; color: white; }
+        .btn-solve:hover { background-color: #d35400; }
+
+        /* Input Styling mit Feedback */
+        select {
+            padding: 5px;
+            border-radius: 4px;
+            border: 2px solid #ccc;
+            font-size: 1rem;
+            background-color: #fff;
+            transition: all 0.2s;
+            cursor: pointer;
+        }
+
+        select.correct {
+            border-color: var(--success-color);
+            background-color: #d4edda;
+            color: #155724;
+            box-shadow: 0 0 5px rgba(39, 174, 96, 0.3);
+        }
+
+        select.incorrect {
+            border-color: var(--error-color);
+            background-color: #f8d7da;
+            color: #721c24;
+            animation: shake 0.3s;
+        }
+
+        /* Radio Buttons */
+        .radio-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .radio-option {
+            display: flex;
+            align-items: center;
+        }
+
+        .radio-option input {
+            margin-right: 10px;
+            cursor: pointer;
+        }
+
+        .radio-option label {
+            cursor: pointer;
+            padding: 8px 12px;
+            border-radius: 4px;
+            width: 100%;
+            border: 1px solid transparent;
+            transition: all 0.2s;
+        }
+
+        /* Feedback Classes für Labels */
+        .label-correct {
+            background-color: #d4edda;
+            color: #155724;
+            border-color: var(--success-color) !important;
+            font-weight: bold;
+        }
+
+        .label-incorrect {
+            background-color: #f8d7da;
+            color: #721c24;
+            border-color: var(--error-color) !important;
+        }
+
+        /* Drag and Drop */
+        .draggables {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 5px;
+            min-height: 50px;
+            margin-bottom: 15px;
+            border: 1px dashed #ccc;
+        }
+
+        .draggable {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 8px 12px;
+            border-radius: 4px;
+            cursor: move;
+            user-select: none;
+            font-size: 0.95rem;
+            box-shadow: 0 2px 2px rgba(0,0,0,0.2);
+            z-index: 10;
+        }
+
+        .drop-zone {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 130px;
+            min-height: 38px;
+            border: 2px dashed #bdc3c7;
+            border-radius: 4px;
+            vertical-align: middle;
+            margin: 0 5px;
+            padding: 2px;
+            background-color: #fff;
+            transition: all 0.2s;
+        }
+
+        .drop-zone.hovered {
+            border-color: var(--accent-color);
+            background-color: #ecf0f1;
+            transform: scale(1.02);
+        }
+
+        .drop-zone.correct {
+            border-color: var(--success-color);
+            background-color: #d4edda;
+            border-style: solid;
+            box-shadow: 0 0 5px rgba(39, 174, 96, 0.3);
+        }
+
+        .drop-zone.incorrect {
+            border-color: var(--error-color);
+            background-color: #f8d7da;
+            border-style: solid;
+        }
+
+        /* Animation für Fehler */
+        @keyframes shake {
+            0% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            50% { transform: translateX(5px); }
+            75% { transform: translateX(-5px); }
+            100% { transform: translateX(0); }
+        }
+
+        @media (max-width: 600px) {
+            .controls {
+                flex-direction: column;
+            }
+            button {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>Das Verb „ЧИТАТЬ“ mit Präfixen</h1>
+
+    <div class="intro-card">
+        <h2>Einführung</h2>
+        <p>Im Russischen verändern Präfixe die Bedeutung des Basisverbs <strong>читать</strong> (lesen). Meistens entsteht dadurch auch ein Aspektwechsel.</p>
+        
+        <h3>Die wichtigsten Präfixe im Überblick:</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th>Verb (Beispiel)</th>
+                    <th>Bedeutung & Nuance</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><strong>про</strong>читать</td>
+                    <td>Etwas komplett (zu Ende) lesen (Resultat).</td>
+                </tr>
+                <tr>
+                    <td><strong>пере</strong>читать</td>
+                    <td>Etwas noch einmal lesen (Wiederholung).</td>
+                </tr>
+                <tr>
+                    <td><strong>до</strong>читать</td>
+                    <td>Etwas bis zum Ende lesen (Abschluss).</td>
+                </tr>
+                <tr>
+                    <td><strong>по</strong>читать</td>
+                    <td>Ein bisschen / eine Zeit lang lesen.</td>
+                </tr>
+                <tr>
+                    <td><strong>вы</strong>читать</td>
+                    <td>Etwas herauslesen (Information finden) oder Korrektur lesen.</td>
+                </tr>
+                <tr>
+                    <td><strong>за</strong>читаться</td>
+                    <td>Sich festlesen, die Zeit vergessen.</td>
+                </tr>
+                <tr>
+                    <td><strong>на</strong>читаться</td>
+                    <td>Genug von etwas gelesen haben (satt sein).</td>
+                </tr>
+                <tr>
+                    <td><strong>в</strong>читаться</td>
+                    <td>Sich tief in einen Text einlesen/vertiefen.</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Übung 1: Drag & Drop Bedeutungen -->
+    <div class="exercise" id="ex1">
+        <div class="exercise-header">Aufgabe 1: Präfixe und Bedeutungen</div>
+        <p class="instruction">Ziehen Sie das russische Verb zur passenden deutschen Beschreibung. (Feedback erscheint sofort)</p>
+        
+        <div class="draggables" id="drag-source-1">
+            <div class="draggable" draggable="true" data-id="pere">перечитать</div>
+            <div class="draggable" draggable="true" data-id="po">почитать</div>
+            <div class="draggable" draggable="true" data-id="do">дочитать</div>
+            <div class="draggable" draggable="true" data-id="za">зачитаться</div>
+        </div>
+
+        <div style="margin-top: 20px;">
+            <p>1. Ein Buch bis zum Ende lesen: <span class="drop-zone" data-match="do"></span></p>
+            <p>2. Etwas erneut lesen: <span class="drop-zone" data-match="pere"></span></p>
+            <p>3. Die Zeit beim Lesen vergessen: <span class="drop-zone" data-match="za"></span></p>
+            <p>4. Ein wenig lesen: <span class="drop-zone" data-match="po"></span></p>
+        </div>
+
+        <div class="controls">
+            <button class="btn-reset" onclick="resetTask('ex1')">Zurücksetzen</button>
+            <button class="btn-solve" onclick="solveTask('ex1')">Lösung</button>
+        </div>
+    </div>
+
+    <!-- Übung 2: Dropdown Aspekte -->
+    <div class="exercise" id="ex2">
+        <div class="exercise-header">Aufgabe 2: Prozess vs. Resultat</div>
+        <p class="instruction">Wählen Sie die richtige Form.</p>
+        
+        <p>1. Gestern habe ich den ganzen Abend ein Buch 
+        <select data-correct="читал" onchange="validateSelect(this)">
+            <option value="">---</option>
+            <option value="читал">читал (gelesen - Prozess)</option>
+            <option value="прочитал">прочитал (durchgelesen - Resultat)</option>
+        </select>.</p>
+        
+        <p>2. Endlich habe ich diesen dicken Roman 
+        <select data-correct="прочитал" onchange="validateSelect(this)">
+            <option value="">---</option>
+            <option value="читал">читал (gelesen)</option>
+            <option value="прочитал">прочитал (durchgelesen)</option>
+        </select>! Er ist toll.</p>
+
+        <div class="controls">
+            <button class="btn-reset" onclick="resetTask('ex2')">Zurücksetzen</button>
+            <button class="btn-solve" onclick="solveTask('ex2')">Lösung</button>
+        </div>
+    </div>
+
+    <!-- Übung 3: Multiple Choice (Wiederholung) -->
+    <div class="exercise" id="ex3">
+        <div class="exercise-header">Aufgabe 3: Wiederholung</div>
+        <p class="instruction">Ich habe nichts verstanden. Ich muss den Text ...</p>
+        
+        <div class="radio-group">
+            <div class="radio-option">
+                <input type="radio" name="ex3" id="ex3_1" value="wrong" onchange="validateRadio(this)">
+                <label for="ex3_1">почитать (ein bisschen lesen)</label>
+            </div>
+            <div class="radio-option">
+                <input type="radio" name="ex3" id="ex3_2" value="correct" onchange="validateRadio(this)">
+                <label for="ex3_2">перечитать (nochmal lesen)</label>
+            </div>
+            <div class="radio-option">
+                <input type="radio" name="ex3" id="ex3_3" value="wrong" onchange="validateRadio(this)">
+                <label for="ex3_3">зачитать (vorlesen)</label>
+            </div>
+        </div>
+
+        <div class="controls">
+            <button class="btn-reset" onclick="resetTask('ex3')">Zurücksetzen</button>
+            <button class="btn-solve" onclick="solveTask('ex3')">Lösung</button>
+        </div>
+    </div>
+
+    <!-- Übung 4: Dropdown (Satt gelesen) -->
+    <div class="exercise" id="ex4">
+        <div class="exercise-header">Aufgabe 4: Zu viel des Guten</div>
+        <p class="instruction">Ergänzen Sie den Satz.</p>
+        <p>„Ich will keine Nachrichten mehr sehen. Ich habe mich an Nachrichten ...“</p>
+        
+        <select data-correct="начитался" onchange="validateSelect(this)">
+            <option value="">Bitte wählen...</option>
+            <option value="зачитался">зачитался</option>
+            <option value="начитался">начитался</option>
+            <option value="вычитал">вычитал</option>
+        </select>
+
+        <div class="controls">
+            <button class="btn-reset" onclick="resetTask('ex4')">Zurücksetzen</button>
+            <button class="btn-solve" onclick="solveTask('ex4')">Lösung</button>
+        </div>
+    </div>
+
+    <!-- Übung 5: Multiple Choice (Korrektur/Finden) -->
+    <div class="exercise" id="ex5">
+        <div class="exercise-header">Aufgabe 5: Information finden</div>
+        <p class="instruction">Welches Verb passt? „Wo hast du diese Information her?“</p>
+        <p>„Ich habe das in der Zeitung ...“</p>
+
+        <div class="radio-group">
+            <div class="radio-option">
+                <input type="radio" name="ex5" id="ex5_1" value="correct" onchange="validateRadio(this)">
+                <label for="ex5_1">вычитал (herausgelesen/gefunden)</label>
+            </div>
+            <div class="radio-option">
+                <input type="radio" name="ex5" id="ex5_2" value="wrong" onchange="validateRadio(this)">
+                <label for="ex5_2">начитал (aufgesprochen)</label>
+            </div>
+            <div class="radio-option">
+                <input type="radio" name="ex5" id="ex5_3" value="wrong" onchange="validateRadio(this)">
+                <label for="ex5_3">дочитал (zu Ende gelesen)</label>
+            </div>
+        </div>
+
+        <div class="controls">
+            <button class="btn-reset" onclick="resetTask('ex5')">Zurücksetzen</button>
+            <button class="btn-solve" onclick="solveTask('ex5')">Lösung</button>
+        </div>
+    </div>
+
+    <!-- Übung 6: Drag & Drop (Reflexive Verben & Fälle) -->
+    <div class="exercise" id="ex6">
+        <div class="exercise-header">Aufgabe 6: Grammatik - Welcher Fall?</div>
+        <p class="instruction">Ordnen Sie den Fall dem passenden Verb zu.</p>
+        
+        <div class="draggables" id="drag-source-6">
+            <div class="draggable" draggable="true" data-id="inst">Instrumental (Творительный)</div>
+            <div class="draggable" draggable="true" data-id="gen">Genitiv (Родительный)</div>
+        </div>
+
+        <div style="margin-top: 20px;">
+            <p>1. <strong>начитаться</strong> (genug haben von...) + <span class="drop-zone" data-match="gen"></span></p>
+            <p>2. <strong>зачитаться</strong> (vertieft sein in...) + <span class="drop-zone" data-match="inst"></span></p>
+        </div>
+
+        <div class="controls">
+            <button class="btn-reset" onclick="resetTask('ex6')">Zurücksetzen</button>
+            <button class="btn-solve" onclick="solveTask('ex6')">Lösung</button>
+        </div>
+    </div>
+
+    <!-- Übung 7: Dropdown (Vorlesen) -->
+    <div class="exercise" id="ex7">
+        <div class="exercise-header">Aufgabe 7: Offiziell verkünden</div>
+        <p class="instruction">Wählen Sie das passende Wort.</p>
+        <p>Der Richter hat das Urteil <select data-correct="зачитал" onchange="validateSelect(this)">
+            <option value="">---</option>
+            <option value="зачитал">зачитал</option>
+            <option value="почитал">почитал</option>
+            <option value="вчитался">вчитался</option>
+        </select>.</p>
+
+        <div class="controls">
+            <button class="btn-reset" onclick="resetTask('ex7')">Zurücksetzen</button>
+            <button class="btn-solve" onclick="solveTask('ex7')">Lösung</button>
+        </div>
+    </div>
+
+    <!-- Übung 8: Multiple Choice (Vertiefen) -->
+    <div class="exercise" id="ex8">
+        <div class="exercise-header">Aufgabe 8: Konzentration</div>
+        <p class="instruction">Der Text ist sehr kompliziert. Man muss sich ...</p>
+        
+        <div class="radio-group">
+            <div class="radio-option">
+                <input type="radio" name="ex8" id="ex8_1" value="wrong" onchange="validateRadio(this)">
+                <label for="ex8_1">считать (vergleichen)</label>
+            </div>
+            <div class="radio-option">
+                <input type="radio" name="ex8" id="ex8_2" value="correct" onchange="validateRadio(this)">
+                <label for="ex8_2">вчитаться (hineinlesen/vertiefen)</label>
+            </div>
+            <div class="radio-option">
+                <input type="radio" name="ex8" id="ex8_3" value="wrong" onchange="validateRadio(this)">
+                <label for="ex8_3">дочитать (beenden)</label>
+            </div>
+        </div>
+
+        <div class="controls">
+            <button class="btn-reset" onclick="resetTask('ex8')">Zurücksetzen</button>
+            <button class="btn-solve" onclick="solveTask('ex8')">Lösung</button>
+        </div>
+    </div>
+
+    <!-- Übung 9: Dropdown (Audioaufnahme) -->
+    <div class="exercise" id="ex9">
+        <div class="exercise-header">Aufgabe 9: Aufnahme</div>
+        <p class="instruction">Ergänzen Sie.</p>
+        <p>Der Schauspieler hat das Hörbuch im Studio <select data-correct="начитал" onchange="validateSelect(this)">
+            <option value="">---</option>
+            <option value="начитал">начитал</option>
+            <option value="прочитал">прочитал</option>
+            <option value="вычитал">вычитал</option>
+        </select>.</p>
+
+        <div class="controls">
+            <button class="btn-reset" onclick="resetTask('ex9')">Zurücksetzen</button>
+            <button class="btn-solve" onclick="solveTask('ex9')">Lösung</button>
+        </div>
+    </div>
+
+    <!-- Übung 10: Drag & Drop (Kontext) -->
+    <div class="exercise" id="ex10">
+        <div class="exercise-header">Aufgabe 10: Kontext zuordnen</div>
+        <p class="instruction">Welches Verb passt in welche Lücke?</p>
+        
+        <div class="draggables" id="drag-source-10">
+            <div class="draggable" draggable="true" data-id="po">почитать</div>
+            <div class="draggable" draggable="true" data-id="do">дочитать</div>
+        </div>
+
+        <div style="margin-top: 20px;">
+            <p>1. Ich habe nur noch 5 Seiten, ich muss das schnell <span class="drop-zone" data-match="do"></span>.</p>
+            <p>2. Hast du Lust, am Abend ein bisschen zu <span class="drop-zone" data-match="po"></span>?</p>
+        </div>
+
+        <div class="controls">
+            <button class="btn-reset" onclick="resetTask('ex10')">Zurücksetzen</button>
+            <button class="btn-solve" onclick="solveTask('ex10')">Lösung</button>
+        </div>
+    </div>
+
+    <!-- Übung 11: Multiple Choice (Präfix po-) -->
+    <div class="exercise" id="ex11">
+        <div class="exercise-header">Aufgabe 11: Zeitform</div>
+        <p class="instruction">Was bedeutet „Я почитал книгу“?</p>
+        
+        <div class="radio-group">
+            <div class="radio-option">
+                <input type="radio" name="ex11" id="ex11_1" value="wrong" onchange="validateRadio(this)">
+                <label for="ex11_1">Ich habe das Buch komplett fertig gelesen.</label>
+            </div>
+            <div class="radio-option">
+                <input type="radio" name="ex11" id="ex11_2" value="correct" onchange="validateRadio(this)">
+                <label for="ex11_2">Ich habe eine Weile im Buch gelesen (und dann aufgehört).</label>
+            </div>
+        </div>
+
+        <div class="controls">
+            <button class="btn-reset" onclick="resetTask('ex11')">Zurücksetzen</button>
+            <button class="btn-solve" onclick="solveTask('ex11')">Lösung</button>
+        </div>
+    </div>
+
+    <!-- Übung 12: Dropdown (Korrekturlesen) -->
+    <div class="exercise" id="ex12">
+        <div class="exercise-header">Aufgabe 12: Fehlersuche</div>
+        <p class="instruction">Der Redakteur muss den Artikel vor dem Druck...</p>
+        <p><select data-correct="вычитать" onchange="validateSelect(this)">
+            <option value="">---</option>
+            <option value="вчитать">вчитать</option>
+            <option value="вычитать">вычитать</option>
+            <option value="считать">считать</option>
+        </select></p>
+
+        <div class="controls">
+            <button class="btn-reset" onclick="resetTask('ex12')">Zurücksetzen</button>
+            <button class="btn-solve" onclick="solveTask('ex12')">Lösung</button>
+        </div>
+    </div>
+
+</div>
+
+<script>
+    // --- Allgemeine Validierungsfunktionen (Sofort-Feedback) ---
+
+    function validateSelect(selectElement) {
+        selectElement.classList.remove('correct', 'incorrect');
+        if (selectElement.value === "") return;
+
+        if (selectElement.value === selectElement.dataset.correct) {
+            selectElement.classList.add('correct');
+        } else {
+            selectElement.classList.add('incorrect');
+        }
+    }
+
+    function validateRadio(radioInput) {
+        const container = radioInput.closest('.radio-group');
+        const allLabels = container.querySelectorAll('label');
+        
+        // Reset Visuals
+        allLabels.forEach(label => label.classList.remove('label-correct', 'label-incorrect'));
+
+        // Aktuelles Label finden
+        const selectedLabel = container.querySelector(`label[for="${radioInput.id}"]`);
+        
+        if (radioInput.value === 'correct') {
+            selectedLabel.classList.add('label-correct');
+        } else {
+            selectedLabel.classList.add('label-incorrect');
+        }
+    }
+
+    // --- Drag and Drop Logic ---
+    let draggedItem = null;
+
+    document.querySelectorAll('.draggable').forEach(item => {
+        item.addEventListener('dragstart', function(e) {
+            draggedItem = this;
+            e.dataTransfer.effectAllowed = 'move';
+            this.style.opacity = '0.4';
+        });
+
+        item.addEventListener('dragend', function() {
+            this.style.opacity = '1';
+            draggedItem = null;
+        });
+    });
+
+    document.querySelectorAll('.drop-zone').forEach(zone => {
+        zone.addEventListener('dragover', function(e) {
+            e.preventDefault();
+            e.dataTransfer.dropEffect = 'move';
+            this.classList.add('hovered');
+        });
+
+        zone.addEventListener('dragleave', function() {
+            this.classList.remove('hovered');
+        });
+
+        zone.addEventListener('drop', function(e) {
+            e.preventDefault();
+            this.classList.remove('hovered');
+            
+            if (draggedItem && !this.hasChildNodes()) {
+                this.appendChild(draggedItem);
+                
+                // Sofortiges Feedback prüfen
+                checkDropZone(this);
+            }
+        });
+        
+        // Klick auf Zone, um Item zurückzulegen
+        zone.addEventListener('click', function() {
+            if(this.children.length > 0) {
+                let item = this.children[0];
+                let exerciseId = this.closest('.exercise').id;
+                let sourceContainer = document.querySelector(`#${exerciseId} .draggables`);
+                sourceContainer.appendChild(item);
+                
+                // Klassen entfernen
+                this.classList.remove('correct', 'incorrect');
+            }
+        });
+    });
+
+    function checkDropZone(zone) {
+        if (zone.children.length === 0) {
+            zone.classList.remove('correct', 'incorrect');
+            return;
+        }
+        
+        const item = zone.children[0];
+        if (item.dataset.id === zone.dataset.match) {
+            zone.classList.add('correct');
+            zone.classList.remove('incorrect');
+        } else {
+            zone.classList.add('incorrect');
+            zone.classList.remove('correct');
+        }
+    }
+
+    // --- Reset & Solve Logic ---
+
+    function resetTask(exId) {
+        const container = document.getElementById(exId);
+        
+        // Selects zurücksetzen
+        container.querySelectorAll('select').forEach(s => {
+            s.value = "";
+            s.classList.remove('correct', 'incorrect');
+        });
+
+        // Radios zurücksetzen
+        container.querySelectorAll('input[type="radio"]').forEach(r => r.checked = false);
+        container.querySelectorAll('label').forEach(l => l.classList.remove('label-correct', 'label-incorrect'));
+
+        // Drag & Drop zurücksetzen
+        const zones = container.querySelectorAll('.drop-zone');
+        const source = container.querySelector('.draggables');
+        if (source) {
+            zones.forEach(zone => {
+                if (zone.children.length > 0) {
+                    source.appendChild(zone.children[0]);
+                }
+                zone.classList.remove('correct', 'incorrect', 'hovered');
+            });
+        }
+    }
+
+    function solveTask(exId) {
+        const container = document.getElementById(exId);
+
+        // Selects lösen
+        container.querySelectorAll('select').forEach(s => {
+            s.value = s.dataset.correct;
+            validateSelect(s); // Trigger visuelles Feedback
+        });
+
+        // Radios lösen
+        container.querySelectorAll('input[type="radio"]').forEach(r => {
+            if (r.value === 'correct') {
+                r.checked = true;
+                validateRadio(r); // Trigger visuelles Feedback
+            }
+        });
+
+        // Drag & Drop lösen
+        const zones = container.querySelectorAll('.drop-zone');
+        const draggables = container.querySelectorAll('.draggable');
+        
+        if (zones.length > 0 && draggables.length > 0) {
+            // Erst alles zurücksetzen (clean state)
+            const source = container.querySelector('.draggables');
+            zones.forEach(zone => {
+                if (zone.children.length > 0) source.appendChild(zone.children[0]);
+            });
+
+            // Dann richtig verteilen
+            zones.forEach(zone => {
+                const matchId = zone.dataset.match;
+                // Finde das passende Element (egal ob in source oder woanders)
+                // Wir suchen im source, da wir oben alles resettet haben
+                const correctItem = Array.from(source.children).find(item => item.dataset.id === matchId);
+                
+                if (correctItem) {
+                    zone.appendChild(correctItem);
+                    checkDropZone(zone);
+                }
+            });
+        }
+    }
+
+</script>
+
+</body>
+</html>
