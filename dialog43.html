@@ -1,0 +1,468 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Russisch: Dialog-Ergänzung</title>
+    
+    <style>
+        :root {
+            --primary: #2c3e50;
+            --accent: #3498db;
+            --bg-body: #e5ddd5; /* WhatsApp-ähnlicher Hintergrund */
+            --bubble-a: #ffffff;
+            --bubble-b: #dcf8c6;
+            --correct-border: #28a745;
+            --wrong-border: #dc3545;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-body);
+            color: #333;
+            margin: 0;
+            padding: 20px;
+            line-height: 1.4;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background-color: rgba(255,255,255,0.6);
+            padding: 20px;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        h1 {
+            color: var(--primary);
+            text-align: center;
+            margin-bottom: 10px;
+        }
+
+        .instruction {
+            text-align: center;
+            color: #555;
+            margin-bottom: 30px;
+            font-style: italic;
+        }
+
+        /* Dialog Container */
+        .dialog-wrapper {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        /* Einzelne Dialog-Einheit */
+        .dialog-unit {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            margin-bottom: 15px;
+            border-bottom: 1px solid rgba(0,0,0,0.05);
+            padding-bottom: 15px;
+        }
+
+        .context-hint {
+            font-size: 0.85rem;
+            color: #666;
+            text-align: center;
+            background: rgba(255,255,255,0.8);
+            padding: 4px 10px;
+            border-radius: 10px;
+            align-self: center;
+            margin-bottom: 5px;
+        }
+
+        /* Sprechblasen */
+        .bubble {
+            max-width: 80%;
+            padding: 10px 15px;
+            border-radius: 15px;
+            position: relative;
+            font-size: 1rem;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+        }
+
+        .bubble-a {
+            align-self: flex-start;
+            background-color: var(--bubble-a);
+            border-top-left-radius: 0;
+        }
+
+        .bubble-b {
+            align-self: flex-end;
+            background-color: var(--bubble-b);
+            border-top-right-radius: 0;
+            text-align: right; /* Text rechtsbündig für B */
+        }
+
+        .bubble-b select {
+            text-align: left; /* Dropdown Text wieder links */
+        }
+
+        .speaker-label {
+            font-size: 0.75rem;
+            font-weight: bold;
+            margin-bottom: 3px;
+            display: block;
+            color: var(--accent);
+        }
+        
+        .bubble-a .speaker-label { color: #e67e22; }
+
+        /* Dropdown im Text */
+        select {
+            padding: 5px;
+            border-radius: 5px;
+            border: 2px solid #ccc;
+            background-color: white;
+            font-size: 0.95rem;
+            cursor: pointer;
+            margin: 0 5px;
+            max-width: 100%;
+        }
+
+        /* Feedback */
+        select.correct {
+            border-color: var(--correct-border);
+            background-color: #d4edda;
+            color: #155724;
+            font-weight: bold;
+        }
+
+        select.incorrect {
+            border-color: var(--wrong-border);
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+
+        /* Controls */
+        .controls {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid #ccc;
+        }
+
+        button.ctrl-btn {
+            padding: 12px 30px;
+            border: none;
+            border-radius: 6px;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            color: white;
+            transition: transform 0.1s;
+        }
+
+        button.reset { background-color: #95a5a6; }
+        button.reset:hover { background-color: #7f8c8d; }
+
+        button.solve { background-color: #f39c12; }
+        button.solve:hover { background-color: #d35400; }
+
+        /* Mobile Optimierung */
+        @media (max-width: 600px) {
+            .bubble {
+                max-width: 90%;
+            }
+            .controls {
+                flex-direction: column;
+            }
+            button.ctrl-btn {
+                width: 100%;
+            }
+            select {
+                display: block;
+                width: 100%;
+                margin: 5px 0;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>Dialog-Ergänzung</h1>
+    <p class="instruction">Vervollständigen Sie den Dialog. Wählen Sie das passende Verb aus dem Menü.</p>
+
+    <div class="dialog-wrapper">
+
+        <!-- Dialog 1: Resultat -->
+        <div class="dialog-unit">
+            <div class="context-hint">Situation: A fragt nach dem Resultat.</div>
+            <div class="bubble bubble-a">
+                <span class="speaker-label">Анна</span>
+                Ты уже знаешь, о чём эта статья?
+            </div>
+            <div class="bubble bubble-b">
+                <span class="speaker-label">Борис</span>
+                Да, я уже 
+                <select data-correct="прочитал" onchange="check(this)">
+                    <option value="">...</option>
+                    <option value="читал">читал</option>
+                    <option value="прочитал">прочитал</option>
+                    <option value="почитал">почитал</option>
+                </select> её.
+            </div>
+        </div>
+
+        <!-- Dialog 2: Wiederholung -->
+        <div class="dialog-unit">
+            <div class="context-hint">Situation: B hat beim ersten Mal nichts verstanden.</div>
+            <div class="bubble bubble-a">
+                <span class="speaker-label">Анна</span>
+                Почему ты читаешь этот текст опять?
+            </div>
+            <div class="bubble bubble-b">
+                <span class="speaker-label">Борис</span>
+                Я ничего не понял, поэтому 
+                <select data-correct="перечитываю" onchange="check(this)">
+                    <option value="">...</option>
+                    <option value="дочитываю">дочитываю</option>
+                    <option value="перечитываю">перечитываю</option>
+                    <option value="зачитываю">зачитываю</option>
+                </select>.
+            </div>
+        </div>
+
+        <!-- Dialog 3: Abschluss -->
+        <div class="dialog-unit">
+            <div class="context-hint">Situation: B braucht nur noch eine Seite.</div>
+            <div class="bubble bubble-a">
+                <span class="speaker-label">Анна</span>
+                Пошли в кино! Мы опаздываем.
+            </div>
+            <div class="bubble bubble-b">
+                <span class="speaker-label">Борис</span>
+                Подожди, мне нужно 
+                <select data-correct="дочитать" onchange="check(this)">
+                    <option value="">...</option>
+                    <option value="прочитать">прочитать</option>
+                    <option value="почитать">почитать</option>
+                    <option value="дочитать">дочитать</option>
+                </select> одну страницу.
+            </div>
+        </div>
+
+        <!-- Dialog 4: Ein bisschen -->
+        <div class="dialog-unit">
+            <div class="context-hint">Situation: Zeitvertreib beim Warten.</div>
+            <div class="bubble bubble-a">
+                <span class="speaker-label">Анна</span>
+                Доктор придёт через 15 минут.
+            </div>
+            <div class="bubble bubble-b">
+                <span class="speaker-label">Борис</span>
+                Хорошо, тогда я пока 
+                <select data-correct="почитаю" onchange="check(this)">
+                    <option value="">...</option>
+                    <option value="почитаю">почитаю</option>
+                    <option value="вчитаюсь">вчитаюсь</option>
+                    <option value="вычитаю">вычитаю</option>
+                </select> журнал.
+            </div>
+        </div>
+
+        <!-- Dialog 5: Vorlesen -->
+        <div class="dialog-unit">
+            <div class="context-hint">Situation: A kann den Text nicht sehen/lesen.</div>
+            <div class="bubble bubble-a">
+                <span class="speaker-label">Анна</span>
+                Я забыла очки. Что там написано?
+            </div>
+            <div class="bubble bubble-b">
+                <span class="speaker-label">Борис</span>
+                Сейчас я тебе 
+                <select data-correct="зачитаю" onchange="check(this)">
+                    <option value="">...</option>
+                    <option value="начитаю">начитаю</option>
+                    <option value="зачитаю">зачитаю</option>
+                    <option value="считаю">считаю</option>
+                </select>.
+            </div>
+        </div>
+
+        <!-- Dialog 6: Korrektur -->
+        <div class="dialog-unit">
+            <div class="context-hint">Situation: Fehlersuche vor dem Druck.</div>
+            <div class="bubble bubble-a">
+                <span class="speaker-label">Анна</span>
+                Статья готова к публикации?
+            </div>
+            <div class="bubble bubble-b">
+                <span class="speaker-label">Борис</span>
+                Почти. Мне нужно ещё раз 
+                <select data-correct="вычитать" onchange="check(this)">
+                    <option value="">...</option>
+                    <option value="вычитать">вычитать</option>
+                    <option value="считать">считать</option>
+                    <option value="отчитать">отчитать</option>
+                </select> текст.
+            </div>
+        </div>
+
+        <!-- Dialog 7: Festgelesen -->
+        <div class="dialog-unit">
+            <div class="context-hint">Situation: B hat die Zeit vergessen.</div>
+            <div class="bubble bubble-a">
+                <span class="speaker-label">Анна</span>
+                Ты где? Ужин уже остыл!
+            </div>
+            <div class="bubble bubble-b">
+                <span class="speaker-label">Борис</span>
+                Извини, я 
+                <select data-correct="зачитался" onchange="check(this)">
+                    <option value="">...</option>
+                    <option value="начитался">начитался</option>
+                    <option value="зачитался">зачитался</option>
+                    <option value="вчитался">вчитался</option>
+                </select> и не смотрел на часы.
+            </div>
+        </div>
+
+        <!-- Dialog 8: Sattgelesen -->
+        <div class="dialog-unit">
+            <div class="context-hint">Situation: B hat genug von Politik.</div>
+            <div class="bubble bubble-a">
+                <span class="speaker-label">Анна</span>
+                Ты видел новости про выборы?
+            </div>
+            <div class="bubble bubble-b">
+                <span class="speaker-label">Борис</span>
+                Нет, я уже 
+                <select data-correct="начитался" onchange="check(this)">
+                    <option value="">...</option>
+                    <option value="начитался">начитался</option>
+                    <option value="почитал">почитал</option>
+                    <option value="дочитал">дочитал</option>
+                </select> об этом. Больше не хочу.
+            </div>
+        </div>
+
+        <!-- Dialog 9: Audioaufnahme -->
+        <div class="dialog-unit">
+            <div class="context-hint">Situation: Arbeit im Tonstudio.</div>
+            <div class="bubble bubble-a">
+                <span class="speaker-label">Анна</span>
+                Актёр уже ушёл?
+            </div>
+            <div class="bubble bubble-b">
+                <span class="speaker-label">Борис</span>
+                Да, он 
+                <select data-correct="начитал" onchange="check(this)">
+                    <option value="">...</option>
+                    <option value="прочитал">прочитал</option>
+                    <option value="начитал">начитал</option>
+                    <option value="вычитал">вычитал</option>
+                </select> весь текст на плёнку.
+            </div>
+        </div>
+
+        <!-- Dialog 10: Ausschimpfen -->
+        <div class="dialog-unit">
+            <div class="context-hint">Situation: Der Chef war wütend.</div>
+            <div class="bubble bubble-a">
+                <span class="speaker-label">Анна</span>
+                Почему Виктор такой грустный?
+            </div>
+            <div class="bubble bubble-b">
+                <span class="speaker-label">Борис</span>
+                Директор его строго 
+                <select data-correct="отчитал" onchange="check(this)">
+                    <option value="">...</option>
+                    <option value="зачитал">зачитал</option>
+                    <option value="отчитал">отчитал</option>
+                    <option value="прочитал">прочитал</option>
+                </select> за опоздание.
+            </div>
+        </div>
+
+        <!-- Dialog 11: Vertiefen -->
+        <div class="dialog-unit">
+            <div class="context-hint">Situation: Schwieriger Vertrag.</div>
+            <div class="bubble bubble-a">
+                <span class="speaker-label">Анна</span>
+                Ты понял этот пункт договора?
+            </div>
+            <div class="bubble bubble-b">
+                <span class="speaker-label">Борис</span>
+                Трудно сказать. Надо внимательно 
+                <select data-correct="вчитаться" onchange="check(this)">
+                    <option value="">...</option>
+                    <option value="считаться">считаться</option>
+                    <option value="вчитаться">вчитаться</option>
+                    <option value="прочитаться">прочитаться</option>
+                </select>.
+            </div>
+        </div>
+
+        <!-- Dialog 12: Scannen -->
+        <div class="dialog-unit">
+            <div class="context-hint">Situation: QR-Code funktioniert nicht.</div>
+            <div class="bubble bubble-a">
+                <span class="speaker-label">Анна</span>
+                Почему дверь не открывается?
+            </div>
+            <div class="bubble bubble-b">
+                <span class="speaker-label">Борис</span>
+                Кажется, сканер не 
+                <select data-correct="считал" onchange="check(this)">
+                    <option value="">...</option>
+                    <option value="прочитал">прочитал</option>
+                    <option value="считал">считал</option>
+                    <option value="вычитал">вычитал</option>
+                </select> твой код.
+            </div>
+        </div>
+
+    </div>
+
+    <div class="controls">
+        <button class="ctrl-btn reset" onclick="resetAll()">Zurücksetzen</button>
+        <button class="ctrl-btn solve" onclick="showSolutions()">Lösungen anzeigen</button>
+    </div>
+</div>
+
+<script>
+    function check(selectElement) {
+        const correctVal = selectElement.dataset.correct;
+        const selectedVal = selectElement.value;
+        
+        // Reset classes
+        selectElement.classList.remove('correct', 'incorrect');
+        
+        if (selectedVal === "") return;
+
+        if (selectedVal === correctVal) {
+            selectElement.classList.add('correct');
+        } else {
+            selectElement.classList.add('incorrect');
+        }
+    }
+
+    function resetAll() {
+        const selects = document.querySelectorAll('select');
+        selects.forEach(sel => {
+            sel.value = "";
+            sel.classList.remove('correct', 'incorrect');
+        });
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function showSolutions() {
+        const selects = document.querySelectorAll('select');
+        selects.forEach(sel => {
+            sel.value = sel.dataset.correct;
+            sel.classList.remove('incorrect');
+            sel.classList.add('correct');
+        });
+    }
+</script>
+
+</body>
+</html>
