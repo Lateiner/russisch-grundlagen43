@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Russisch Grammatik: Rektion der Verben</title>
+    
+    <style>
+        :root {
+            --primary: #2c3e50;
+            --accent: #3498db;
+            --correct-bg: #d4edda;
+            --correct-border: #28a745;
+            --correct-text: #155724;
+            --wrong-bg: #f8d7da;
+            --wrong-border: #dc3545;
+            --wrong-text: #721c24;
+            --bg-body: #f4f6f7;
+            --card-bg: #ffffff;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-body);
+            color: #333;
+            margin: 0;
+            padding: 20px;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            color: var(--primary);
+            text-align: center;
+            margin-bottom: 10px;
+        }
+
+        .instruction {
+            text-align: center;
+            color: #555;
+            margin-bottom: 30px;
+            font-style: italic;
+        }
+
+        /* Grid für die Sätze */
+        .grid-container {
+            display: grid;
+            grid-template-columns: 1fr; /* Mobile First: 1 Spalte */
+            gap: 15px;
+        }
+
+        /* Desktop: 2 Spalten */
+        @media (min-width: 768px) {
+            .grid-container {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+
+        .task-card {
+            background: var(--card-bg);
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+            border: 1px solid #e1e1e1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .sentence {
+            font-size: 1.1rem;
+            margin-bottom: 10px;
+            line-height: 2; /* Mehr Platz für das Dropdown */
+        }
+
+        /* Das Dropdown-Menü */
+        select {
+            padding: 8px 12px;
+            border-radius: 6px;
+            border: 2px solid #bdc3c7;
+            background-color: #fff;
+            font-size: 1rem;
+            cursor: pointer;
+            outline: none;
+            transition: all 0.2s ease;
+            max-width: 100%;
+            font-family: inherit;
+        }
+
+        select:hover {
+            border-color: var(--accent);
+        }
+
+        select:focus {
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.2);
+        }
+
+        /* Feedback-Zustände */
+        select.correct {
+            border-color: var(--correct-border);
+            background-color: var(--correct-bg);
+            color: var(--correct-text);
+            font-weight: bold;
+        }
+
+        select.incorrect {
+            border-color: var(--wrong-border);
+            background-color: var(--wrong-bg);
+            color: var(--wrong-text);
+            animation: shake 0.3s;
+        }
+
+        /* Hinweis (Nominativ) */
+        .hint {
+            color: #7f8c8d;
+            font-size: 0.9rem;
+            display: block;
+            margin-top: 5px;
+            font-style: italic;
+        }
+        
+        .hint::before {
+            content: "Basisform: ";
+        }
+
+        /* Buttons */
+        .controls {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid #ddd;
+        }
+
+        button.ctrl-btn {
+            padding: 12px 30px;
+            border: none;
+            border-radius: 6px;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            color: white;
+            transition: transform 0.1s;
+        }
+
+        button.reset { background-color: #95a5a6; }
+        button.reset:hover { background-color: #7f8c8d; }
+
+        button.solve { background-color: #f39c12; }
+        button.solve:hover { background-color: #d35400; }
+
+        @keyframes shake {
+            0% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            50% { transform: translateX(5px); }
+            75% { transform: translateX(-5px); }
+            100% { transform: translateX(0); }
+        }
+
+        /* Mobile Anpassung */
+        @media (max-width: 600px) {
+            .controls {
+                flex-direction: column;
+            }
+            button.ctrl-btn {
+                width: 100%;
+            }
+            select {
+                width: 100%; /* Auf Handy volle Breite */
+                margin-top: 5px;
+                margin-bottom: 5px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>Grammatik: Der richtige Fall (Rektion)</h1>
+    <p class="instruction">Wählen Sie die korrekte Endung. Achten Sie darauf, welchen Fall das Verb verlangt (Akkusativ, Genitiv oder Instrumental).</p>
+
+    <div class="grid-container">
+
+        <!-- 1. зачитаться + Instrumental -->
+        <div class="task-card">
+            <div class="sentence">
+                Она <strong>зачиталась</strong> 
+                <select data-correct="интересной книгой" onchange="checkAnswer(this)">
+                    <option value="">...</option>
+                    <option value="интересная книга">интересная книга (Nom)</option>
+                    <option value="интересную книгу">интересную книгу (Akk)</option>
+                    <option value="интересной книгой">интересной книгой (Instr)</option>
+                </select>.
+            </div>
+            <div class="hint">интересная книга</div>
+        </div>
+
+        <!-- 2. прочитать + Akkusativ -->
+        <div class="task-card">
+            <div class="sentence">
+                Я <strong>прочитал</strong> эту
+                <select data-correct="статью" onchange="checkAnswer(this)">
+                    <option value="">...</option>
+                    <option value="статья">статья (Nom)</option>
+                    <option value="статью">статью (Akk)</option>
+                    <option value="статьей">статьей (Instr)</option>
+                </select>.
+            </div>
+            <div class="hint">статья</div>
+        </div>
+
+        <!-- 3. начитаться + Genitiv -->
+        <div class="task-card">
+            <div class="sentence">
+                Мы <strong>начитались</strong> плохих
+                <select data-correct="новостей" onchange="checkAnswer(this)">
+                    <option value="">...</option>
+                    <option value="новости">новости (Nom)</option>
+                    <option value="новостей">новостей (Gen)</option>
+                    <option value="новостями">новостями (Instr)</option>
+                </select>.
+            </div>
+            <div class="hint">плохие новости</div>
+        </div>
+
+        <!-- 4. вычитать + Akkusativ -->
+        <div class="task-card">
+            <div class="sentence">
+                Он <strong>вычитал</strong> полезную
+                <select data-correct="информацию" onchange="checkAnswer(this)">
+                    <option value="">...</option>
+                    <option value="информация">информация (Nom)</option>
+                    <option value="информации">информации (Gen)</option>
+                    <option value="информацию">информацию (Akk)</option>
+                </select>.
+            </div>
+            <div class="hint">полезная информация</div>
+        </div>
+
+        <!-- 5. перечитать + Akkusativ -->
+        <div class="task-card">
+            <div class="sentence">
+                Советую тебе <strong>перечитать</strong> этот
+                <select data-correct="роман" onchange="checkAnswer(this)">
+                    <option value="">...</option>
+                    <option value="роман">роман (Akk = Nom)</option>
+                    <option value="романа">романа (Gen)</option>
+                    <option value="романом">романом (Instr)</option>
+                </select>.
+            </div>
+            <div class="hint">этот роман</div>
+        </div>
+
+        <!-- 6. вчитаться + в + Akkusativ -->
+        <div class="task-card">
+            <div class="sentence">
+                Нужно <strong>вчитаться</strong> в каждую
+                <select data-correct="фразу" onchange="checkAnswer(this)">
+                    <option value="">...</option>
+                    <option value="фраза">фраза (Nom)</option>
+                    <option value="фразу">фразу (Akk)</option>
+                    <option value="фразой">фразой (Instr)</option>
+                </select>.
+            </div>
+            <div class="hint">каждая фраза</div>
+        </div>
+
+        <!-- 7. дочитать + Akkusativ -->
+        <div class="task-card">
+            <div class="sentence">
+                Ты уже <strong>дочитал</strong> моё
+                <select data-correct="письмо" onchange="checkAnswer(this)">
+                    <option value="">...</option>
+                    <option value="письмо">письмо (Akk = Nom)</option>
+                    <option value="письма">письма (Gen)</option>
+                    <option value="письмом">письмом (Instr)</option>
+                </select>?
+            </div>
+            <div class="hint">моё письмо</div>
+        </div>
+
+        <!-- 8. начитаться + Genitiv (Personen/Autoren) -->
+        <div class="task-card">
+            <div class="sentence">
+                Студенты <strong>начитались</strong>
+                <select data-correct="Пушкина" onchange="checkAnswer(this)">
+                    <option value="">...</option>
+                    <option value="Пушкин">Пушкин (Nom)</option>
+                    <option value="Пушкина">Пушкина (Gen)</option>
+                    <option value="Пушкиным">Пушкиным (Instr)</option>
+                </select>.
+            </div>
+            <div class="hint">Александр Пушкин</div>
+        </div>
+
+        <!-- 9. зачитать + Akkusativ (Offiziell) -->
+        <div class="task-card">
+            <div class="sentence">
+                Судья <strong>зачитал</strong>
+                <select data-correct="приговор" onchange="checkAnswer(this)">
+                    <option value="">...</option>
+                    <option value="приговор">приговор (Akk = Nom)</option>
+                    <option value="приговора">приговора (Gen)</option>
+                    <option value="приговору">приговору (Dat)</option>
+                </select>.
+            </div>
+            <div class="hint">приговор (das Urteil)</div>
+        </div>
+
+        <!-- 10. зачитаться + Instrumental (Plural) -->
+        <div class="task-card">
+            <div class="sentence">
+                Дедушка <strong>зачитался</strong> старыми
+                <select data-correct="газетами" onchange="checkAnswer(this)">
+                    <option value="">...</option>
+                    <option value="газеты">газеты (Nom)</option>
+                    <option value="газет">газет (Gen)</option>
+                    <option value="газетами">газетами (Instr)</option>
+                </select>.
+            </div>
+            <div class="hint">старые газеты</div>
+        </div>
+
+        <!-- 11. почитать + Akkusativ -->
+        <div class="task-card">
+            <div class="sentence">
+                Дай мне <strong>почитать</strong> твой
+                <select data-correct="журнал" onchange="checkAnswer(this)">
+                    <option value="">...</option>
+                    <option value="журнал">журнал (Akk = Nom)</option>
+                    <option value="журнала">журнала (Gen)</option>
+                    <option value="журналом">журналом (Instr)</option>
+                </select>.
+            </div>
+            <div class="hint">твой журнал</div>
+        </div>
+
+        <!-- 12. начитать + Akkusativ (Audio) -->
+        <div class="task-card">
+            <div class="sentence">
+                Диктор <strong>начитал</strong>
+                <select data-correct="сообщение" onchange="checkAnswer(this)">
+                    <option value="">...</option>
+                    <option value="сообщение">сообщение (Akk = Nom)</option>
+                    <option value="сообщения">сообщения (Gen)</option>
+                    <option value="сообщением">сообщением (Instr)</option>
+                </select> на микрофон.
+            </div>
+            <div class="hint">сообщение</div>
+        </div>
+
+    </div>
+
+    <div class="controls">
+        <button class="ctrl-btn reset" onclick="resetAll()">Zurücksetzen</button>
+        <button class="ctrl-btn solve" onclick="showSolutions()">Lösungen anzeigen</button>
+    </div>
+</div>
+
+<script>
+    function checkAnswer(selectElement) {
+        // Klassen zurücksetzen
+        selectElement.classList.remove('correct', 'incorrect');
+        
+        // Nichts ausgewählt
+        if (selectElement.value === "") return;
+
+        const correctValue = selectElement.dataset.correct;
+        const selectedValue = selectElement.value;
+
+        if (selectedValue === correctValue) {
+            selectElement.classList.add('correct');
+        } else {
+            selectElement.classList.add('incorrect');
+        }
+    }
+
+    function resetAll() {
+        const selects = document.querySelectorAll('select');
+        selects.forEach(select => {
+            select.value = "";
+            select.classList.remove('correct', 'incorrect');
+        });
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function showSolutions() {
+        const selects = document.querySelectorAll('select');
+        selects.forEach(select => {
+            select.value = select.dataset.correct;
+            // Trigger validation visual
+            select.classList.remove('incorrect');
+            select.classList.add('correct');
+        });
+    }
+</script>
+
+</body>
+</html>
