@@ -1,0 +1,542 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Russisch: Übersetzen & Satzbau</title>
+    
+    <style>
+        :root {
+            --primary: #2c3e50;
+            --accent: #3498db;
+            --correct-bg: #d4edda;
+            --correct-border: #28a745;
+            --wrong-bg: #f8d7da;
+            --wrong-border: #dc3545;
+            --bg-body: #f4f7f6;
+            --card-bg: #ffffff;
+            --word-bg: #ecf0f1;
+            --word-hover: #d5dbdb;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-body);
+            color: #333;
+            margin: 0;
+            padding: 20px;
+            line-height: 1.5;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            color: var(--primary);
+            text-align: center;
+            margin-bottom: 10px;
+        }
+
+        .instruction {
+            text-align: center;
+            color: #555;
+            margin-bottom: 30px;
+            font-style: italic;
+        }
+
+        /* Grid für die Aufgaben */
+        .grid-container {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 25px;
+        }
+        
+        @media (min-width: 768px) {
+            .grid-container {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+
+        /* Die Aufgaben-Karte */
+        .translation-card {
+            background: var(--card-bg);
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.05);
+            border: 1px solid #e0e0e0;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Deutscher Satz */
+        .german-sentence {
+            font-weight: bold;
+            color: var(--primary);
+            margin-bottom: 15px;
+            border-left: 4px solid var(--accent);
+            padding-left: 10px;
+            font-size: 1.05rem;
+        }
+
+        .nuance-hint {
+            font-weight: normal;
+            font-size: 0.85rem;
+            color: #7f8c8d;
+            display: block;
+            margin-top: 4px;
+        }
+
+        /* Der Bereich, wo der Satz gebaut wird (Ergebnis) */
+        .result-zone {
+            min-height: 50px;
+            border: 2px dashed #bdc3c7;
+            border-radius: 8px;
+            padding: 10px;
+            margin-bottom: 15px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            background-color: #fafafa;
+            transition: all 0.3s;
+            align-items: center;
+        }
+
+        .result-zone.filled {
+            border-style: solid;
+            background-color: #fff;
+            border-color: #95a5a6;
+        }
+
+        .result-zone.correct {
+            border-color: var(--correct-border);
+            background-color: var(--correct-bg);
+        }
+
+        .result-zone.wrong {
+            border-color: var(--wrong-border);
+            background-color: var(--wrong-bg);
+            animation: shake 0.3s;
+        }
+
+        /* Wort-Buttons */
+        .word-bank {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-bottom: 15px;
+        }
+
+        .word-btn {
+            background-color: var(--word-bg);
+            border: 1px solid #bdc3c7;
+            border-radius: 6px;
+            padding: 8px 12px;
+            cursor: pointer;
+            font-size: 1rem;
+            user-select: none;
+            transition: transform 0.1s, background-color 0.2s;
+            color: #2c3e50;
+        }
+
+        .word-btn:hover {
+            background-color: var(--word-hover);
+            transform: translateY(-2px);
+        }
+
+        /* Buttons im Ergebnis-Bereich (zum Entfernen) */
+        .result-zone .word-btn {
+            background-color: var(--accent);
+            color: white;
+            border-color: var(--accent);
+        }
+        
+        .result-zone .word-btn:hover {
+            background-color: #2980b9;
+        }
+
+        /* Controls */
+        .card-controls {
+            display: flex;
+            gap: 10px;
+            margin-top: auto; /* Push to bottom */
+        }
+
+        button.action-btn {
+            flex: 1;
+            padding: 10px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 0.9rem;
+            transition: background 0.2s;
+        }
+
+        .btn-check { background-color: var(--correct-border); color: white; }
+        .btn-check:hover { background-color: #218838; }
+
+        .btn-reset { background-color: #95a5a6; color: white; }
+        .btn-reset:hover { background-color: #7f8c8d; }
+
+        /* Animation */
+        @keyframes shake {
+            0% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            50% { transform: translateX(5px); }
+            75% { transform: translateX(-5px); }
+            100% { transform: translateX(0); }
+        }
+
+        /* Verstecke genutzte Wörter in der Bank (optional, hier entfernen wir sie aus dem DOM der Bank) */
+        
+        /* Globale Controls */
+        .global-controls {
+            display: flex;
+            justify-content: center;
+            margin-top: 40px;
+            border-top: 1px solid #ddd;
+            padding-top: 20px;
+        }
+        
+        .global-btn {
+            padding: 12px 30px;
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 1rem;
+            cursor: pointer;
+        }
+        .global-btn:hover { background-color: #1a252f; }
+        
+        /* Lösungstext (versteckt) */
+        .solution-display {
+            display: none;
+            margin-top: 10px;
+            font-size: 0.9rem;
+            color: var(--correct-text);
+            font-weight: bold;
+            text-align: center;
+        }
+
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>Übersetzung & Satzbau</h1>
+    <p class="instruction">Bauen Sie den russischen Satz, indem Sie die Wörter in der richtigen Reihenfolge anklicken. <br>Achten Sie genau auf die Nuance des deutschen Satzes.</p>
+
+    <div class="grid-container">
+
+        <!-- 1. Vorlesen -->
+        <div class="translation-card" id="card-1" data-solution="Зачитай это пожалуйста">
+            <div class="german-sentence">Lies das bitte vor. <span class="nuance-hint">(Nuance: laut vortragen / verkünden)</span></div>
+            <div class="result-zone" id="result-1"></div>
+            <div class="word-bank" id="bank-1">
+                <!-- Wörter werden per JS gemischt -->
+                <button class="word-btn" onclick="moveWord(this, 'result-1', 'bank-1')">Зачитай</button>
+                <button class="word-btn" onclick="moveWord(this, 'result-1', 'bank-1')">это</button>
+                <button class="word-btn" onclick="moveWord(this, 'result-1', 'bank-1')">пожалуйста</button>
+                <button class="word-btn" onclick="moveWord(this, 'result-1', 'bank-1')">Прочитай</button> <!-- Distraktor -->
+            </div>
+            <div class="card-controls">
+                <button class="action-btn btn-reset" onclick="resetCard('card-1')">Reset</button>
+                <button class="action-btn btn-check" onclick="checkCard('card-1')">Prüfen</button>
+            </div>
+            <div class="solution-display">Lösung: Зачитай это пожалуйста</div>
+        </div>
+
+        <!-- 2. Sattgelesen -->
+        <div class="translation-card" id="card-2" data-solution="Я начитался">
+            <div class="german-sentence">Ich habe mich sattgelesen. <span class="nuance-hint">(Nuance: genug/zu viel davon)</span></div>
+            <div class="result-zone" id="result-2"></div>
+            <div class="word-bank" id="bank-2">
+                <button class="word-btn" onclick="moveWord(this, 'result-2', 'bank-2')">Я</button>
+                <button class="word-btn" onclick="moveWord(this, 'result-2', 'bank-2')">начитался</button>
+                <button class="word-btn" onclick="moveWord(this, 'result-2', 'bank-2')">зачитался</button> <!-- Distraktor -->
+            </div>
+            <div class="card-controls">
+                <button class="action-btn btn-reset" onclick="resetCard('card-2')">Reset</button>
+                <button class="action-btn btn-check" onclick="checkCard('card-2')">Prüfen</button>
+            </div>
+            <div class="solution-display">Lösung: Я начитался</div>
+        </div>
+
+        <!-- 3. Zu Ende lesen -->
+        <div class="translation-card" id="card-3" data-solution="Дочитай письмо">
+            <div class="german-sentence">Lies den Brief zu Ende. <span class="nuance-hint">(Nuance: Abschluss)</span></div>
+            <div class="result-zone" id="result-3"></div>
+            <div class="word-bank" id="bank-3">
+                <button class="word-btn" onclick="moveWord(this, 'result-3', 'bank-3')">письмо</button>
+                <button class="word-btn" onclick="moveWord(this, 'result-3', 'bank-3')">Дочитай</button>
+                <button class="word-btn" onclick="moveWord(this, 'result-3', 'bank-3')">Прочитай</button> <!-- Distraktor -->
+            </div>
+            <div class="card-controls">
+                <button class="action-btn btn-reset" onclick="resetCard('card-3')">Reset</button>
+                <button class="action-btn btn-check" onclick="checkCard('card-3')">Prüfen</button>
+            </div>
+            <div class="solution-display">Lösung: Дочитай письмо</div>
+        </div>
+
+        <!-- 4. Ein bisschen lesen -->
+        <div class="translation-card" id="card-4" data-solution="Я хочу почитать">
+            <div class="german-sentence">Ich möchte ein bisschen lesen. <span class="nuance-hint">(Nuance: Zeitvertreib)</span></div>
+            <div class="result-zone" id="result-4"></div>
+            <div class="word-bank" id="bank-4">
+                <button class="word-btn" onclick="moveWord(this, 'result-4', 'bank-4')">хочу</button>
+                <button class="word-btn" onclick="moveWord(this, 'result-4', 'bank-4')">Я</button>
+                <button class="word-btn" onclick="moveWord(this, 'result-4', 'bank-4')">почитать</button>
+                <button class="word-btn" onclick="moveWord(this, 'result-4', 'bank-4')">прочитать</button> <!-- Distraktor -->
+            </div>
+            <div class="card-controls">
+                <button class="action-btn btn-reset" onclick="resetCard('card-4')">Reset</button>
+                <button class="action-btn btn-check" onclick="checkCard('card-4')">Prüfen</button>
+            </div>
+            <div class="solution-display">Lösung: Я хочу почитать</div>
+        </div>
+
+        <!-- 5. Hineinlesen / Vertiefen -->
+        <div class="translation-card" id="card-5" data-solution="Нужно вчитаться в текст">
+            <div class="german-sentence">Man muss sich in den Text hineinlesen. <span class="nuance-hint">(Nuance: vertiefen/verstehen)</span></div>
+            <div class="result-zone" id="result-5"></div>
+            <div class="word-bank" id="bank-5">
+                <button class="word-btn" onclick="moveWord(this, 'result-5', 'bank-5')">вчитаться</button>
+                <button class="word-btn" onclick="moveWord(this, 'result-5', 'bank-5')">в</button>
+                <button class="word-btn" onclick="moveWord(this, 'result-5', 'bank-5')">текст</button>
+                <button class="word-btn" onclick="moveWord(this, 'result-5', 'bank-5')">Нужно</button>
+                <button class="word-btn" onclick="moveWord(this, 'result-5', 'bank-5')">на</button> <!-- Distraktor -->
+            </div>
+            <div class="card-controls">
+                <button class="action-btn btn-reset" onclick="resetCard('card-5')">Reset</button>
+                <button class="action-btn btn-check" onclick="checkCard('card-5')">Prüfen</button>
+            </div>
+            <div class="solution-display">Lösung: Нужно вчитаться в текст</div>
+        </div>
+
+        <!-- 6. Noch einmal lesen -->
+        <div class="translation-card" id="card-6" data-solution="Перечитай статью">
+            <div class="german-sentence">Lies den Artikel noch einmal. <span class="nuance-hint">(Nuance: Wiederholung)</span></div>
+            <div class="result-zone" id="result-6"></div>
+            <div class="word-bank" id="bank-6">
+                <button class="word-btn" onclick="moveWord(this, 'result-6', 'bank-6')">статью</button>
+                <button class="word-btn" onclick="moveWord(this, 'result-6', 'bank-6')">Перечитай</button>
+                <button class="word-btn" onclick="moveWord(this, 'result-6', 'bank-6')">Прочитай</button> <!-- Distraktor -->
+            </div>
+            <div class="card-controls">
+                <button class="action-btn btn-reset" onclick="resetCard('card-6')">Reset</button>
+                <button class="action-btn btn-check" onclick="checkCard('card-6')">Prüfen</button>
+            </div>
+            <div class="solution-display">Lösung: Перечитай статью</div>
+        </div>
+
+        <!-- 7. Herauslesen / Finden -->
+        <div class="translation-card" id="card-7" data-solution="Он вычитал информацию">
+            <div class="german-sentence">Er hat die Info herausgelesen. <span class="nuance-hint">(Nuance: gefunden/entdeckt)</span></div>
+            <div class="result-zone" id="result-7"></div>
+            <div class="word-bank" id="bank-7">
+                <button class="word-btn" onclick="moveWord(this, 'result-7', 'bank-7')">информацию</button>
+                <button class="word-btn" onclick="moveWord(this, 'result-7', 'bank-7')">Он</button>
+                <button class="word-btn" onclick="moveWord(this, 'result-7', 'bank-7')">вычитал</button>
+                <button class="word-btn" onclick="moveWord(this, 'result-7', 'bank-7')">зачитал</button> <!-- Distraktor -->
+            </div>
+            <div class="card-controls">
+                <button class="action-btn btn-reset" onclick="resetCard('card-7')">Reset</button>
+                <button class="action-btn btn-check" onclick="checkCard('card-7')">Prüfen</button>
+            </div>
+            <div class="solution-display">Lösung: Он вычитал информацию</div>
+        </div>
+
+        <!-- 8. Festlesen -->
+        <div class="translation-card" id="card-8" data-solution="Я зачитался">
+            <div class="german-sentence">Ich habe mich festgelesen. <span class="nuance-hint">(Nuance: Zeit vergessen)</span></div>
+            <div class="result-zone" id="result-8"></div>
+            <div class="word-bank" id="bank-8">
+                <button class="word-btn" onclick="moveWord(this, 'result-8', 'bank-8')">зачитался</button>
+                <button class="word-btn" onclick="moveWord(this, 'result-8', 'bank-8')">Я</button>
+                <button class="word-btn" onclick="moveWord(this, 'result-8', 'bank-8')">начитался</button> <!-- Distraktor -->
+            </div>
+            <div class="card-controls">
+                <button class="action-btn btn-reset" onclick="resetCard('card-8')">Reset</button>
+                <button class="action-btn btn-check" onclick="checkCard('card-8')">Prüfen</button>
+            </div>
+            <div class="solution-display">Lösung: Я зачитался</div>
+        </div>
+
+        <!-- 9. Aufsprechen -->
+        <div class="translation-card" id="card-9" data-solution="Он начитал текст">
+            <div class="german-sentence">Er hat den Text aufgesprochen. <span class="nuance-hint">(Nuance: Audioaufnahme)</span></div>
+            <div class="result-zone" id="result-9"></div>
+            <div class="word-bank" id="bank-9">
+                <button class="word-btn" onclick="moveWord(this, 'result-9', 'bank-9')">текст</button>
+                <button class="word-btn" onclick="moveWord(this, 'result-9', 'bank-9')">начитал</button>
+                <button class="word-btn" onclick="moveWord(this, 'result-9', 'bank-9')">Он</button>
+                <button class="word-btn" onclick="moveWord(this, 'result-9', 'bank-9')">прочитал</button> <!-- Distraktor -->
+            </div>
+            <div class="card-controls">
+                <button class="action-btn btn-reset" onclick="resetCard('card-9')">Reset</button>
+                <button class="action-btn btn-check" onclick="checkCard('card-9')">Prüfen</button>
+            </div>
+            <div class="solution-display">Lösung: Он начитал текст</div>
+        </div>
+
+        <!-- 10. Korrektur lesen -->
+        <div class="translation-card" id="card-10" data-solution="Ты должен вычитать текст">
+            <div class="german-sentence">Du musst den Text Korrektur lesen. <span class="nuance-hint">(Nuance: Fehler suchen)</span></div>
+            <div class="result-zone" id="result-10"></div>
+            <div class="word-bank" id="bank-10">
+                <button class="word-btn" onclick="moveWord(this, 'result-10', 'bank-10')">текст</button>
+                <button class="word-btn" onclick="moveWord(this, 'result-10', 'bank-10')">вычитать</button>
+                <button class="word-btn" onclick="moveWord(this, 'result-10', 'bank-10')">Ты</button>
+                <button class="word-btn" onclick="moveWord(this, 'result-10', 'bank-10')">должен</button>
+                <button class="word-btn" onclick="moveWord(this, 'result-10', 'bank-10')">прочитать</button> <!-- Distraktor -->
+            </div>
+            <div class="card-controls">
+                <button class="action-btn btn-reset" onclick="resetCard('card-10')">Reset</button>
+                <button class="action-btn btn-check" onclick="checkCard('card-10')">Prüfen</button>
+            </div>
+            <div class="solution-display">Lösung: Ты должен вычитать текст</div>
+        </div>
+
+        <!-- 11. Ausschimpfen -->
+        <div class="translation-card" id="card-11" data-solution="Отец отчитал сына">
+            <div class="german-sentence">Der Vater hat den Sohn ausgeschimpft. <span class="nuance-hint">(Nuance: Standpauke)</span></div>
+            <div class="result-zone" id="result-11"></div>
+            <div class="word-bank" id="bank-11">
+                <button class="word-btn" onclick="moveWord(this, 'result-11', 'bank-11')">отчитал</button>
+                <button class="word-btn" onclick="moveWord(this, 'result-11', 'bank-11')">сына</button>
+                <button class="word-btn" onclick="moveWord(this, 'result-11', 'bank-11')">Отец</button>
+                <button class="word-btn" onclick="moveWord(this, 'result-11', 'bank-11')">зачитал</button> <!-- Distraktor -->
+            </div>
+            <div class="card-controls">
+                <button class="action-btn btn-reset" onclick="resetCard('card-11')">Reset</button>
+                <button class="action-btn btn-check" onclick="checkCard('card-11')">Prüfen</button>
+            </div>
+            <div class="solution-display">Lösung: Отец отчитал сына</div>
+        </div>
+
+        <!-- 12. Durchlesen (Ganz) -->
+        <div class="translation-card" id="card-12" data-solution="Я прочитал книгу">
+            <div class="german-sentence">Ich habe das Buch (ganz) gelesen. <span class="nuance-hint">(Nuance: Resultat/Fertig)</span></div>
+            <div class="result-zone" id="result-12"></div>
+            <div class="word-bank" id="bank-12">
+                <button class="word-btn" onclick="moveWord(this, 'result-12', 'bank-12')">Я</button>
+                <button class="word-btn" onclick="moveWord(this, 'result-12', 'bank-12')">прочитал</button>
+                <button class="word-btn" onclick="moveWord(this, 'result-12', 'bank-12')">книгу</button>
+                <button class="word-btn" onclick="moveWord(this, 'result-12', 'bank-12')">читал</button> <!-- Distraktor -->
+            </div>
+            <div class="card-controls">
+                <button class="action-btn btn-reset" onclick="resetCard('card-12')">Reset</button>
+                <button class="action-btn btn-check" onclick="checkCard('card-12')">Prüfen</button>
+            </div>
+            <div class="solution-display">Lösung: Я прочитал книгу</div>
+        </div>
+
+    </div>
+
+    <div class="global-controls">
+        <button class="global-btn" onclick="resetAllCards()">Alle zurücksetzen</button>
+    </div>
+</div>
+
+<script>
+    // Funktion zum Verschieben der Wörter
+    function moveWord(btnElement, resultId, bankId) {
+        const resultZone = document.getElementById(resultId);
+        const bankZone = document.getElementById(bankId);
+        
+        // Wo ist der Button gerade?
+        if (btnElement.parentElement.id === bankId) {
+            // Bewege zu Resultat
+            resultZone.appendChild(btnElement);
+        } else {
+            // Bewege zurück zur Bank
+            bankZone.appendChild(btnElement);
+            // Wenn Resultat leer ist, Styling entfernen
+            if (resultZone.children.length === 0) {
+                resultZone.classList.remove('filled', 'correct', 'wrong');
+            }
+        }
+        
+        // Status "Gefüllt" setzen, wenn Wörter im Resultat sind
+        if (resultZone.children.length > 0) {
+            resultZone.classList.add('filled');
+            // Reset validation colors if moved
+            resultZone.classList.remove('correct', 'wrong');
+        }
+    }
+
+    // Funktion zum Mischen der Wörter (beim Laden)
+    function shuffleWords() {
+        const banks = document.querySelectorAll('.word-bank');
+        banks.forEach(bank => {
+            for (let i = bank.children.length; i >= 0; i--) {
+                bank.appendChild(bank.children[Math.random() * i | 0]);
+            }
+        });
+    }
+
+    // Prüfung
+    function checkCard(cardId) {
+        const card = document.getElementById(cardId);
+        const resultZone = card.querySelector('.result-zone');
+        const correctSentence = card.dataset.solution;
+        const solutionDisplay = card.querySelector('.solution-display');
+        
+        // Baue den Satz aus den Buttons im Resultat
+        let constructedSentence = [];
+        for (let btn of resultZone.children) {
+            constructedSentence.push(btn.innerText);
+        }
+        let resultString = constructedSentence.join(' ');
+
+        if (resultString === correctSentence) {
+            resultZone.classList.remove('wrong');
+            resultZone.classList.add('correct');
+        } else {
+            resultZone.classList.remove('correct');
+            resultZone.classList.add('wrong');
+            solutionDisplay.style.display = 'block'; // Lösung anzeigen bei Fehler
+        }
+    }
+
+    // Reset einer Karte
+    function resetCard(cardId) {
+        const card = document.getElementById(cardId);
+        const resultZone = card.querySelector('.result-zone');
+        const bankZone = card.querySelector('.word-bank');
+        const solutionDisplay = card.querySelector('.solution-display');
+
+        // Alle Buttons zurück in die Bank
+        while (resultZone.children.length > 0) {
+            bankZone.appendChild(resultZone.children[0]);
+        }
+
+        resultZone.classList.remove('filled', 'correct', 'wrong');
+        solutionDisplay.style.display = 'none';
+        
+        // Optional: Neu mischen
+        for (let i = bankZone.children.length; i >= 0; i--) {
+            bankZone.appendChild(bankZone.children[Math.random() * i | 0]);
+        }
+    }
+
+    // Alle resetten
+    function resetAllCards() {
+        const cards = document.querySelectorAll('.translation-card');
+        cards.forEach(card => {
+            resetCard(card.id);
+        });
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    // Init
+    window.onload = function() {
+        shuffleWords();
+    };
+</script>
+
+</body>
+</html>
