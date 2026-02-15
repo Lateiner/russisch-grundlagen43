@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Russisch: Verben zuordnen (12 Beispiele)</title>
+    <!-- Polyfill für Touch-Geräte -->
+    <script src="https://cdn.jsdelivr.net/npm/drag-drop-touch@1.3.1/DragDropTouch.js"></script>
+    
+    <style>
+        :root {
+            --primary: #2c3e50;
+            --accent: #2980b9;
+            --correct-bg: #d4edda;
+            --correct-border: #28a745;
+            --wrong-bg: #f8d7da;
+            --wrong-border: #dc3545;
+            --card-bg: #ffffff;
+            --bg-body: #ecf0f1;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-body);
+            color: #333;
+            margin: 0;
+            padding: 20px;
+            line-height: 1.4;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: var(--card-bg);
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        }
+
+        h1 {
+            color: var(--primary);
+            text-align: center;
+            margin-top: 0;
+            font-size: 1.6rem;
+        }
+
+        .instruction {
+            text-align: center;
+            color: #555;
+            margin-bottom: 20px;
+            font-style: italic;
+        }
+
+        /* Quelle (Pool) */
+        .source-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            justify-content: center;
+            background-color: #eef2f5;
+            padding: 15px;
+            border-radius: 8px;
+            border: 2px dashed #bdc3c7;
+            min-height: 80px;
+            margin-bottom: 25px;
+        }
+
+        /* Ziehbare Elemente */
+        .draggable {
+            background-color: var(--accent);
+            color: white;
+            padding: 8px 12px;
+            border-radius: 4px;
+            cursor: grab;
+            font-size: 0.9rem;
+            box-shadow: 0 2px 3px rgba(0,0,0,0.15);
+            transition: transform 0.1s, opacity 0.2s;
+            user-select: none;
+            z-index: 10;
+        }
+
+        .draggable:active {
+            cursor: grabbing;
+            transform: scale(1.02);
+        }
+
+        /* Raster */
+        .matching-grid {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .match-row {
+            display: flex;
+            align-items: stretch;
+            background-color: #fff;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            overflow: hidden;
+        }
+
+        /* Russisches Verb */
+        .ru-term {
+            background-color: var(--primary);
+            color: white;
+            width: 130px; /* Feste Breite Desktop */
+            padding: 10px;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            flex-shrink: 0;
+            font-size: 1rem;
+        }
+
+        /* Zielzone */
+        .drop-zone {
+            flex-grow: 1;
+            min-height: 45px;
+            background-color: #f9f9f9;
+            display: flex;
+            align-items: center;
+            padding: 5px 10px;
+            border-left: 1px solid #ddd;
+            transition: background 0.2s;
+        }
+
+        .drop-zone.hovered {
+            background-color: #e8f4fd;
+        }
+
+        /* Feedback */
+        .drop-zone.correct {
+            background-color: var(--correct-bg);
+            border-left: 5px solid var(--correct-border);
+        }
+        
+        .drop-zone.correct .draggable {
+            background-color: var(--correct-border);
+            cursor: default;
+        }
+
+        .drop-zone.incorrect {
+            background-color: var(--wrong-bg);
+            border-left: 5px solid var(--wrong-border);
+            animation: shake 0.4s;
+        }
+
+        .drop-zone.incorrect .draggable {
+            background-color: var(--wrong-border);
+        }
+
+        /* Buttons */
+        .controls {
+            margin-top: 25px;
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+        }
+
+        button {
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            color: white;
+        }
+
+        .btn-reset { background-color: #7f8c8d; }
+        .btn-reset:hover { background-color: #6c7a89; }
+
+        .btn-solve { background-color: #f39c12; }
+        .btn-solve:hover { background-color: #d35400; }
+
+        @keyframes shake {
+            0% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            75% { transform: translateX(5px); }
+            100% { transform: translateX(0); }
+        }
+
+        /* Mobile Optimierung */
+        @media (max-width: 600px) {
+            .container { padding: 10px; }
+            .match-row { flex-direction: column; }
+            .ru-term { width: 100%; padding: 8px; justify-content: flex-start; padding-left: 15px; }
+            .drop-zone { width: 100%; min-height: 50px; border-left: none; border-top: 1px solid #eee; }
+            .controls { flex-direction: column; }
+            button { width: 100%; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>Wortschatz: Verben zuordnen (12 Beispiele)</h1>
+    <p class="instruction">Ziehen Sie die deutsche Bedeutung in das Feld neben dem passenden russischen Verb.</p>
+
+    <!-- Pool der Antworten -->
+    <div class="source-container" id="source">
+        <div class="draggable" draggable="true" data-id="chit">lesen (Handlung/Prozess)</div>
+        <div class="draggable" draggable="true" data-id="pro">ein Buch ganz durchlesen (Resultat)</div>
+        <div class="draggable" draggable="true" data-id="pere">etwas noch einmal lesen</div>
+        <div class="draggable" draggable="true" data-id="do">den Rest zu Ende lesen</div>
+        <div class="draggable" draggable="true" data-id="po">ein wenig / eine Weile lesen</div>
+        <div class="draggable" draggable="true" data-id="vy">Korrektur lesen / Fehler suchen</div>
+        <div class="draggable" draggable="true" data-id="za_refl">sich festlesen (Zeit vergessen)</div>
+        <div class="draggable" draggable="true" data-id="na">genug haben (sich sattlesen)</div>
+        <div class="draggable" draggable="true" data-id="v">sich vertiefen / hineinlesen</div>
+        <div class="draggable" draggable="true" data-id="za_act">etwas verkünden / vorlesen</div>
+        <div class="draggable" draggable="true" data-id="s">Daten scannen / Texte vergleichen</div>
+        <div class="draggable" draggable="true" data-id="ot">jemanden ausschimpfen (Standpauke)</div>
+    </div>
+
+    <!-- Raster -->
+    <div class="matching-grid">
+        
+        <!-- 1. Basis -->
+        <div class="match-row">
+            <div class="ru-term">читать</div>
+            <div class="drop-zone" data-match="chit"></div>
+        </div>
+
+        <!-- 2. Resultat -->
+        <div class="match-row">
+            <div class="ru-term">прочитать</div>
+            <div class="drop-zone" data-match="pro"></div>
+        </div>
+
+        <!-- 3. Wiederholung -->
+        <div class="match-row">
+            <div class="ru-term">перечитать</div>
+            <div class="drop-zone" data-match="pere"></div>
+        </div>
+
+        <!-- 4. Abschluss -->
+        <div class="match-row">
+            <div class="ru-term">дочитать</div>
+            <div class="drop-zone" data-match="do"></div>
+        </div>
+
+        <!-- 5. Begrenzung -->
+        <div class="match-row">
+            <div class="ru-term">почитать</div>
+            <div class="drop-zone" data-match="po"></div>
+        </div>
+
+        <!-- 6. Finden/Prüfen -->
+        <div class="match-row">
+            <div class="ru-term">вычитать</div>
+            <div class="drop-zone" data-match="vy"></div>
+        </div>
+
+        <!-- 7. Vertiefen -->
+        <div class="match-row">
+            <div class="ru-term">вчитаться</div>
+            <div class="drop-zone" data-match="v"></div>
+        </div>
+
+        <!-- 8. Begeisterung -->
+        <div class="match-row">
+            <div class="ru-term">зачитаться</div>
+            <div class="drop-zone" data-match="za_refl"></div>
+        </div>
+
+        <!-- 9. Überdruss -->
+        <div class="match-row">
+            <div class="ru-term">начитаться</div>
+            <div class="drop-zone" data-match="na"></div>
+        </div>
+
+        <!-- 10. Verkünden -->
+        <div class="match-row">
+            <div class="ru-term">зачитывать</div>
+            <div class="drop-zone" data-match="za_act"></div>
+        </div>
+
+        <!-- 11. Scannen/Vergleichen -->
+        <div class="match-row">
+            <div class="ru-term">считывать</div>
+            <div class="drop-zone" data-match="s"></div>
+        </div>
+
+        <!-- 12. Schimpfen (Figurativ) -->
+        <div class="match-row">
+            <div class="ru-term">отчитать</div>
+            <div class="drop-zone" data-match="ot"></div>
+        </div>
+
+    </div>
+
+    <div class="controls">
+        <button class="btn-reset" onclick="resetGame()">Zurücksetzen</button>
+        <button class="btn-solve" onclick="showSolution()">Lösung anzeigen</button>
+    </div>
+</div>
+
+<script>
+    const draggables = document.querySelectorAll('.draggable');
+    const dropZones = document.querySelectorAll('.drop-zone');
+    const sourceContainer = document.getElementById('source');
+    let draggedItem = null;
+
+    // --- Drag & Drop ---
+    draggables.forEach(item => {
+        item.addEventListener('dragstart', () => {
+            draggedItem = item;
+            item.style.opacity = '0.5';
+        });
+        item.addEventListener('dragend', () => {
+            draggedItem = null;
+            item.style.opacity = '1';
+        });
+    });
+
+    dropZones.forEach(zone => {
+        zone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            zone.classList.add('hovered');
+        });
+
+        zone.addEventListener('dragleave', () => {
+            zone.classList.remove('hovered');
+        });
+
+        zone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            zone.classList.remove('hovered');
+            if (draggedItem) {
+                // Wenn Zone voll, altes Item zurück
+                if (zone.children.length > 0) sourceContainer.appendChild(zone.children[0]);
+                
+                zone.appendChild(draggedItem);
+                checkZone(zone);
+            }
+        });
+
+        // Click-to-Return
+        zone.addEventListener('click', () => {
+            if (zone.children.length > 0) {
+                sourceContainer.appendChild(zone.children[0]);
+                zone.classList.remove('correct', 'incorrect');
+            }
+        });
+    });
+
+    // --- Feedback ---
+    function checkZone(zone) {
+        if (zone.children.length === 0) {
+            zone.classList.remove('correct', 'incorrect');
+            return;
+        }
+        const item = zone.children[0];
+        if (item.dataset.id === zone.dataset.match) {
+            zone.classList.add('correct');
+            zone.classList.remove('incorrect');
+        } else {
+            zone.classList.add('incorrect');
+            zone.classList.remove('correct');
+        }
+    }
+
+    // --- Controls ---
+    function resetGame() {
+        draggables.forEach(item => sourceContainer.appendChild(item));
+        dropZones.forEach(zone => zone.classList.remove('correct', 'incorrect', 'hovered'));
+        
+        // Mischen
+        for (let i = sourceContainer.children.length; i >= 0; i--) {
+            sourceContainer.appendChild(sourceContainer.children[Math.random() * i | 0]);
+        }
+    }
+
+    function showSolution() {
+        resetGame(); // Clean state
+        dropZones.forEach(zone => {
+            const matchId = zone.dataset.match;
+            const correctItem = Array.from(sourceContainer.children).find(item => item.dataset.id === matchId);
+            if (correctItem) {
+                zone.appendChild(correctItem);
+                checkZone(zone);
+            }
+        });
+    }
+
+    // Beim Laden einmal mischen
+    window.onload = resetGame;
+</script>
+
+</body>
+</html>
