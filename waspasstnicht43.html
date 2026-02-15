@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Russisch: Das Kuckucksei (8 Aufgaben)</title>
+    <!-- Polyfill für Touch-Geräte -->
+    <script src="https://cdn.jsdelivr.net/npm/drag-drop-touch@1.3.1/DragDropTouch.js"></script>
+    
+    <style>
+        :root {
+            --primary: #2c3e50;
+            --accent: #3498db;
+            --correct: #27ae60;
+            --wrong: #c0392b;
+            --bg-body: #f4f7f6;
+            --card-bg: #ffffff;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-body);
+            color: #333;
+            margin: 0;
+            padding: 20px;
+            line-height: 1.5;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            color: var(--primary);
+            text-align: center;
+            margin-bottom: 10px;
+        }
+
+        .instruction {
+            text-align: center;
+            color: #666;
+            margin-bottom: 30px;
+            font-style: italic;
+        }
+
+        /* 2-Spalten Layout für die Fragenkarten auf dem Desktop */
+        .cards-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr; /* 2 Karten nebeneinander */
+            gap: 20px;
+        }
+
+        /* Karten-Design */
+        .question-card {
+            background: var(--card-bg);
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 3px 6px rgba(0,0,0,0.05);
+            border: 1px solid #e1e1e1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .context-title {
+            font-weight: bold;
+            color: var(--accent);
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            font-size: 0.85rem;
+            letter-spacing: 0.5px;
+            border-bottom: 2px solid #f0f0f0;
+            padding-bottom: 5px;
+        }
+
+        .question-text {
+            font-size: 1.05rem;
+            margin-bottom: 15px;
+            color: var(--primary);
+            font-style: italic;
+            flex-grow: 1; /* Damit Buttons unten bündig sind */
+        }
+
+        /* Grid für die Antwortmöglichkeiten innerhalb der Karte */
+        .options-list {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .option-btn {
+            background-color: #f8f9fa;
+            border: 1px solid #ced4da;
+            border-radius: 6px;
+            padding: 10px 12px;
+            font-size: 0.95rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-align: left;
+            position: relative;
+            color: #495057;
+        }
+
+        .option-btn:hover {
+            background-color: #e2e6ea;
+            border-color: #adb5bd;
+        }
+
+        /* Feedback Styles */
+        .option-btn.correct {
+            background-color: #d4edda;
+            border-color: var(--correct);
+            color: #155724;
+            font-weight: bold;
+        }
+        
+        .option-btn.correct::after {
+            content: "✓ Das Kuckucksei!";
+            float: right;
+            font-size: 0.8rem;
+            opacity: 0.8;
+        }
+
+        .option-btn.wrong {
+            background-color: #f8d7da;
+            border-color: var(--wrong);
+            color: #721c24;
+            opacity: 0.6;
+        }
+
+        /* Deaktivierter Zustand */
+        .question-card.answered .option-btn {
+            pointer-events: none;
+        }
+
+        /* Buttons unten */
+        .controls {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            margin-top: 40px;
+            padding-top: 20px;
+            border-top: 1px solid #ddd;
+            width: 100%;
+        }
+
+        button.ctrl-btn {
+            padding: 12px 30px;
+            border: none;
+            border-radius: 6px;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            color: white;
+            transition: transform 0.1s;
+        }
+
+        button.reset { background-color: #95a5a6; }
+        button.reset:hover { background-color: #7f8c8d; }
+
+        button.solve { background-color: #f39c12; }
+        button.solve:hover { background-color: #d35400; }
+
+        /* Responsive Anpassung */
+        @media (max-width: 768px) {
+            .cards-grid {
+                grid-template-columns: 1fr; /* Untereinander auf Tablets/Mobile */
+            }
+            .controls {
+                flex-direction: column;
+            }
+            button.ctrl-btn {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>Das Kuckucksei (Odd One Out)</h1>
+    <p class="instruction">Welches Verb passt <strong>NICHT</strong> in den logischen Kontext? <br>Klicken Sie auf das Wort, das aus der Reihe tanzt.</p>
+
+    <div class="cards-grid">
+        
+        <!-- Frage 1 -->
+        <div class="question-card" id="q1" data-correct="3">
+            <div class="context-title">1. Kontext: Buchinhalt konsumieren</div>
+            <div class="question-text">„Ich habe das Buch gestern...“</div>
+            <div class="options-list">
+                <button class="option-btn" onclick="checkAnswer('q1', 1)">1. прочитал (gelesen/beendet)</button>
+                <button class="option-btn" onclick="checkAnswer('q1', 2)">2. дочитал (zu Ende gelesen)</button>
+                <button class="option-btn" onclick="checkAnswer('q1', 3)">3. начитал (aufgesprochen)</button>
+                <button class="option-btn" onclick="checkAnswer('q1', 4)">4. перечитал (nochmal gelesen)</button>
+            </div>
+        </div>
+
+        <!-- Frage 2 -->
+        <div class="question-card" id="q2" data-correct="4">
+            <div class="context-title">2. Kontext: Tiefe & Intensität</div>
+            <div class="question-text">„Er war völlig weg, er hat sich...“</div>
+            <div class="options-list">
+                <button class="option-btn" onclick="checkAnswer('q2', 1)">1. зачитался (festgelesen)</button>
+                <button class="option-btn" onclick="checkAnswer('q2', 2)">2. вчитался (vertieft)</button>
+                <button class="option-btn" onclick="checkAnswer('q2', 3)">3. начитался (sattgelesen)</button>
+                <button class="option-btn" onclick="checkAnswer('q2', 4)">4. почитал (ein bisschen gelesen)</button>
+            </div>
+        </div>
+
+        <!-- Frage 3 -->
+        <div class="question-card" id="q3" data-correct="1">
+            <div class="context-title">3. Kontext: Textbearbeitung (Korrektur)</div>
+            <div class="question-text">„Der Redakteur muss den Text...“</div>
+            <div class="options-list">
+                <button class="option-btn" onclick="checkAnswer('q3', 1)">1. зачитаться (die Zeit vergessen)</button>
+                <button class="option-btn" onclick="checkAnswer('q3', 2)">2. вычитать (Korrektur lesen)</button>
+                <button class="option-btn" onclick="checkAnswer('q3', 3)">3. проверить (überprüfen)</button>
+                <button class="option-btn" onclick="checkAnswer('q3', 4)">4. исправить (korrigieren)</button>
+            </div>
+        </div>
+
+        <!-- Frage 4 -->
+        <div class="question-card" id="q4" data-correct="2">
+            <div class="context-title">4. Kontext: Laut / Öffentlich</div>
+            <div class="question-text">„Der Sprecher muss die Nachricht...“</div>
+            <div class="options-list">
+                <button class="option-btn" onclick="checkAnswer('q4', 1)">1. зачитать (verkünden)</button>
+                <button class="option-btn" onclick="checkAnswer('q4', 2)">2. вчитаться (leise vertiefen)</button>
+                <button class="option-btn" onclick="checkAnswer('q4', 3)">3. прочитать (vorlesen)</button>
+                <button class="option-btn" onclick="checkAnswer('q4', 4)">4. озвучить (vertonen)</button>
+            </div>
+        </div>
+
+        <!-- Frage 5 (NEU) -->
+        <div class="question-card" id="q5" data-correct="4">
+            <div class="context-title">5. Kontext: Information finden</div>
+            <div class="question-text">„Ich habe diese Fakten in der Zeitung...“</div>
+            <div class="options-list">
+                <button class="option-btn" onclick="checkAnswer('q5', 1)">1. вычитал (herausgelesen)</button>
+                <button class="option-btn" onclick="checkAnswer('q5', 2)">2. нашел (gefunden)</button>
+                <button class="option-btn" onclick="checkAnswer('q5', 3)">3. узнал (erfahren)</button>
+                <button class="option-btn" onclick="checkAnswer('q5', 4)">4. зачитался (festgelesen)</button>
+            </div>
+        </div>
+
+        <!-- Frage 6 (NEU) -->
+        <div class="question-card" id="q6" data-correct="1">
+            <div class="context-title">6. Kontext: Beiläufigkeit / Kurze Zeit</div>
+            <div class="question-text">„Ich warte auf den Bus, ich werde kurz...“</div>
+            <div class="options-list">
+                <button class="option-btn" onclick="checkAnswer('q6', 1)">1. вчитаться (tief studieren)</button>
+                <button class="option-btn" onclick="checkAnswer('q6', 2)">2. почитать (ein bisschen lesen)</button>
+                <button class="option-btn" onclick="checkAnswer('q6', 3)">3. полистать (durchblättern)</button>
+                <button class="option-btn" onclick="checkAnswer('q6', 4)">4. просмотреть (überfliegen)</button>
+            </div>
+        </div>
+
+        <!-- Frage 7 (NEU) -->
+        <div class="question-card" id="q7" data-correct="3">
+            <div class="context-title">7. Kontext: Wiederholung</div>
+            <div class="question-text">„Ich habe den Satz nicht verstanden. Ich muss ihn...“</div>
+            <div class="options-list">
+                <button class="option-btn" onclick="checkAnswer('q7', 1)">1. перечитать (nochmal lesen)</button>
+                <button class="option-btn" onclick="checkAnswer('q7', 2)">2. повторить (wiederholen)</button>
+                <button class="option-btn" onclick="checkAnswer('q7', 3)">3. дочитать (zu Ende lesen)</button>
+                <button class="option-btn" onclick="checkAnswer('q7', 4)">4. еще раз прочитать (erneut lesen)</button>
+            </div>
+        </div>
+
+        <!-- Frage 8 (NEU) -->
+        <div class="question-card" id="q8" data-correct="2">
+            <div class="context-title">8. Kontext: Tonstudio</div>
+            <div class="question-text">„Der Schauspieler muss das Hörbuch...“</div>
+            <div class="options-list">
+                <button class="option-btn" onclick="checkAnswer('q8', 1)">1. начитать (einsprechen)</button>
+                <button class="option-btn" onclick="checkAnswer('q8', 2)">2. вычитать (Korrektur lesen)</button>
+                <button class="option-btn" onclick="checkAnswer('q8', 3)">3. записать (aufnehmen)</button>
+                <button class="option-btn" onclick="checkAnswer('q8', 4)">4. прочитать (vorlesen)</button>
+            </div>
+        </div>
+
+    </div>
+
+    <div class="controls">
+        <button class="ctrl-btn reset" onclick="resetAll()">Zurücksetzen</button>
+        <button class="ctrl-btn solve" onclick="showSolutions()">Lösungen anzeigen</button>
+    </div>
+</div>
+
+<script>
+    function checkAnswer(questionId, selectedIndex) {
+        const card = document.getElementById(questionId);
+        
+        // Verhindern, dass man mehrmals klickt
+        if (card.classList.contains('answered')) return;
+        
+        const correctIndex = parseInt(card.dataset.correct);
+        const buttons = card.querySelectorAll('.option-btn');
+        
+        // Karte als beantwortet markieren
+        card.classList.add('answered');
+
+        if (selectedIndex === correctIndex) {
+            // Richtig geraten (das Kuckucksei gefunden)
+            buttons[selectedIndex - 1].classList.add('correct');
+        } else {
+            // Falsch geraten
+            buttons[selectedIndex - 1].classList.add('wrong');
+            // Zeige die richtige Lösung
+            buttons[correctIndex - 1].classList.add('correct');
+        }
+    }
+
+    function resetAll() {
+        const cards = document.querySelectorAll('.question-card');
+        cards.forEach(card => {
+            card.classList.remove('answered');
+            const buttons = card.querySelectorAll('.option-btn');
+            buttons.forEach(btn => {
+                btn.classList.remove('correct', 'wrong');
+            });
+        });
+        // Scroll nach oben (optional, gute UX bei vielen Karten)
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function showSolutions() {
+        resetAll();
+        const cards = document.querySelectorAll('.question-card');
+        cards.forEach(card => {
+            card.classList.add('answered');
+            const correctIndex = parseInt(card.dataset.correct);
+            const buttons = card.querySelectorAll('.option-btn');
+            buttons[correctIndex - 1].classList.add('correct');
+        });
+    }
+</script>
+
+</body>
+</html>
