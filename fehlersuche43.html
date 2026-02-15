@@ -1,0 +1,439 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Russisch: Fehlersuche</title>
+    
+    <style>
+        :root {
+            --primary: #2c3e50;
+            --accent: #e74c3c; /* Rot für Fehler */
+            --correct-bg: #d4edda;
+            --correct-border: #28a745;
+            --correct-text: #155724;
+            --wrong-bg: #f8d7da;
+            --wrong-border: #dc3545;
+            --bg-body: #fdf2f2; /* Ganz leicht rötlicher Hintergrund */
+            --card-bg: #ffffff;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-body);
+            color: #333;
+            margin: 0;
+            padding: 20px;
+            line-height: 1.5;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            color: var(--primary);
+            text-align: center;
+            margin-bottom: 10px;
+        }
+
+        .instruction {
+            text-align: center;
+            color: #666;
+            margin-bottom: 30px;
+            font-style: italic;
+        }
+
+        /* Grid Layout */
+        .grid-wrapper {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 20px;
+        }
+
+        @media (min-width: 768px) {
+            .grid-wrapper {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+
+        /* Die Fehler-Karte */
+        .error-card {
+            background: var(--card-bg);
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            border: 1px solid #e1e1e1;
+            border-left: 5px solid var(--accent);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .context-hint {
+            font-size: 0.85rem;
+            color: #888;
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        /* Der falsche Satz */
+        .incorrect-sentence {
+            font-size: 1.1rem;
+            color: var(--accent);
+            background-color: #fff5f5;
+            padding: 10px;
+            border-radius: 6px;
+            margin-bottom: 15px;
+            font-family: 'Courier New', Courier, monospace; /* Code-Look für "Fehler" */
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .incorrect-sentence::before {
+            content: "❌";
+        }
+
+        .question {
+            font-weight: bold;
+            margin-bottom: 10px;
+            color: var(--primary);
+        }
+
+        /* Optionen */
+        .options-list {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .correction-btn {
+            background: #fff;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            padding: 10px 15px;
+            text-align: left;
+            cursor: pointer;
+            font-size: 1rem;
+            color: #444;
+            transition: all 0.2s;
+            position: relative;
+        }
+
+        .correction-btn:hover {
+            border-color: #aaa;
+            background-color: #f9f9f9;
+        }
+
+        /* Feedback */
+        .correction-btn.correct {
+            background-color: var(--correct-bg);
+            border-color: var(--correct-border);
+            color: var(--correct-text);
+            font-weight: bold;
+        }
+
+        .correction-btn.correct::after {
+            content: "✔ Richtig";
+            position: absolute;
+            right: 10px;
+            font-size: 0.8rem;
+            opacity: 0.8;
+        }
+
+        .correction-btn.wrong {
+            background-color: var(--wrong-bg);
+            border-color: var(--wrong-border);
+            color: var(--wrong-text);
+            text-decoration: line-through;
+            opacity: 0.6;
+        }
+
+        /* Erklärung nach Lösung */
+        .explanation {
+            margin-top: 10px;
+            font-size: 0.9rem;
+            color: var(--correct-text);
+            display: none;
+            padding: 8px;
+            background: #e8f5e9;
+            border-radius: 5px;
+        }
+
+        .error-card.solved .explanation {
+            display: block;
+        }
+
+        .error-card.solved .correction-btn {
+            pointer-events: none;
+        }
+        
+        .error-card.solved .correction-btn:not(.correct):not(.wrong) {
+            opacity: 0.5;
+        }
+
+        /* Controls */
+        .controls {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            margin-top: 40px;
+            padding-top: 20px;
+            border-top: 1px solid #ddd;
+            grid-column: 1 / -1;
+        }
+
+        button.ctrl-btn {
+            padding: 12px 30px;
+            border: none;
+            border-radius: 6px;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            color: white;
+            transition: transform 0.1s;
+        }
+
+        button.reset { background-color: #95a5a6; }
+        button.reset:hover { background-color: #7f8c8d; }
+
+        button.solve { background-color: #f39c12; }
+        button.solve:hover { background-color: #d35400; }
+
+        @media (max-width: 600px) {
+            .controls {
+                flex-direction: column;
+            }
+            button.ctrl-btn {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>Fehlersuche (Error Spotting)</h1>
+    <p class="instruction">In jedem Satz ist ein Fehler versteckt (Grammatik oder Sinn).<br>Wählen Sie die korrigierte Version aus.</p>
+
+    <div class="grid-wrapper">
+
+        <!-- 1. Fallfehler: начитаться -->
+        <div class="error-card">
+            <div class="context-hint">Fehler: Rektion (Fall)</div>
+            <div class="incorrect-sentence">Я начитался эту книгу.</div>
+            <div class="question">Korrektur:</div>
+            <div class="options-list">
+                <button class="correction-btn" onclick="check(this, false)">Я начитался этой книгой.</button>
+                <button class="correction-btn" onclick="check(this, true)">Я начитался этой книги.</button>
+                <button class="correction-btn" onclick="check(this, false)">Я начитался эта книга.</button>
+            </div>
+            <div class="explanation">Info: начитаться + Genitiv (чего?).</div>
+        </div>
+
+        <!-- 2. Fallfehler: зачитаться -->
+        <div class="error-card">
+            <div class="context-hint">Fehler: Rektion (Fall)</div>
+            <div class="incorrect-sentence">Он зачитался интересный роман.</div>
+            <div class="question">Korrektur:</div>
+            <div class="options-list">
+                <button class="correction-btn" onclick="check(this, true)">Он зачитался интересным романом.</button>
+                <button class="correction-btn" onclick="check(this, false)">Он зачитался интересного романа.</button>
+                <button class="correction-btn" onclick="check(this, false)">Он зачитался в интересный роман.</button>
+            </div>
+            <div class="explanation">Info: зачитаться + Instrumental (чем?).</div>
+        </div>
+
+        <!-- 3. Sinnfehler: lesen vs. vorlesen -->
+        <div class="error-card">
+            <div class="context-hint">Fehler: Falsches Präfix (Sinn)</div>
+            <div class="incorrect-sentence">Судья прочитал приговор в суде.</div>
+            <div class="question">Besser (offiziell):</div>
+            <div class="options-list">
+                <button class="correction-btn" onclick="check(this, false)">Судья вычитал приговор.</button>
+                <button class="correction-btn" onclick="check(this, false)">Судья вчитал приговор.</button>
+                <button class="correction-btn" onclick="check(this, true)">Судья зачитал приговор.</button>
+            </div>
+            <div class="explanation">Info: зачитать = feierlich/offiziell verkünden.</div>
+        </div>
+
+        <!-- 4. Fallfehler: вчитаться -->
+        <div class="error-card">
+            <div class="context-hint">Fehler: Präposition/Fall</div>
+            <div class="incorrect-sentence">Нужно вчитаться текстом.</div>
+            <div class="question">Korrektur:</div>
+            <div class="options-list">
+                <button class="correction-btn" onclick="check(this, true)">Нужно вчитаться в текст.</button>
+                <button class="correction-btn" onclick="check(this, false)">Нужно вчитаться текста.</button>
+                <button class="correction-btn" onclick="check(this, false)">Нужно вчитаться тексте.</button>
+            </div>
+            <div class="explanation">Info: вчитаться в + Akkusativ (sich vertiefen in).</div>
+        </div>
+
+        <!-- 5. Sinnfehler: scannen -->
+        <div class="error-card">
+            <div class="context-hint">Fehler: Falsches Präfix</div>
+            <div class="incorrect-sentence">Сканер перечитывает штрих-код.</div>
+            <div class="question">Korrektur:</div>
+            <div class="options-list">
+                <button class="correction-btn" onclick="check(this, false)">Сканер вычитывает штрих-код.</button>
+                <button class="correction-btn" onclick="check(this, true)">Сканер считывает штрих-код.</button>
+                <button class="correction-btn" onclick="check(this, false)">Сканер зачитывает штрих-код.</button>
+            </div>
+            <div class="explanation">Info: считывать = Daten erfassen/scannen.</div>
+        </div>
+
+        <!-- 6. Sinnfehler: ausschimpfen -->
+        <div class="error-card">
+            <div class="context-hint">Fehler: Falsches Präfix</div>
+            <div class="incorrect-sentence">Отец дочитал сына за двойку.</div>
+            <div class="question">Korrektur:</div>
+            <div class="options-list">
+                <button class="correction-btn" onclick="check(this, false)">Отец начитал сына.</button>
+                <button class="correction-btn" onclick="check(this, false)">Отец прочитал сына.</button>
+                <button class="correction-btn" onclick="check(this, true)">Отец отчитал сына.</button>
+            </div>
+            <div class="explanation">Info: отчитать = jemanden ausschimpfen (Standpauke).</div>
+        </div>
+
+        <!-- 7. Fallfehler: aufsprechen -->
+        <div class="error-card">
+            <div class="context-hint">Fehler: Präposition fehlt</div>
+            <div class="incorrect-sentence">Он начитал текст микрофоном.</div>
+            <div class="question">Korrektur:</div>
+            <div class="options-list">
+                <button class="correction-btn" onclick="check(this, true)">Он начитал текст на микрофон.</button>
+                <button class="correction-btn" onclick="check(this, false)">Он начитал текста в микрофон.</button>
+                <button class="correction-btn" onclick="check(this, false)">Он начитал текстом на микрофон.</button>
+            </div>
+            <div class="explanation">Info: начитать что-то (Akk) на что-то (Akk).</div>
+        </div>
+
+        <!-- 8. Sinnfehler: finden -->
+        <div class="error-card">
+            <div class="context-hint">Fehler: Falsches Präfix</div>
+            <div class="incorrect-sentence">Я почитал в газете интересную новость.</div>
+            <div class="question">Korrektur (suchen & finden):</div>
+            <div class="options-list">
+                <button class="correction-btn" onclick="check(this, true)">Я вычитал в газете новость.</button>
+                <button class="correction-btn" onclick="check(this, false)">Я зачитал в газете новость.</button>
+                <button class="correction-btn" onclick="check(this, false)">Я дочитал в газете новость.</button>
+            </div>
+            <div class="explanation">Info: вычитать = eine Information herauslesen/entdecken.</div>
+        </div>
+
+        <!-- 9. Sinnfehler: Ein bisschen -->
+        <div class="error-card">
+            <div class="context-hint">Fehler: Falsches Präfix (Zeit)</div>
+            <div class="incorrect-sentence">У меня есть 5 минут, я начитаю журнал.</div>
+            <div class="question">Korrektur (kurz lesen):</div>
+            <div class="options-list">
+                <button class="correction-btn" onclick="check(this, false)">... я перечитаю журнал.</button>
+                <button class="correction-btn" onclick="check(this, true)">... я почитаю журнал.</button>
+                <button class="correction-btn" onclick="check(this, false)">... я вчитаюсь журнал.</button>
+            </div>
+            <div class="explanation">Info: почитать = ein wenig lesen (zeitlich begrenzt).</div>
+        </div>
+
+        <!-- 10. Fallfehler: перечитать -->
+        <div class="error-card">
+            <div class="context-hint">Fehler: Rektion (Fall)</div>
+            <div class="incorrect-sentence">Я хочу перечитать этого романа.</div>
+            <div class="question">Korrektur:</div>
+            <div class="options-list">
+                <button class="correction-btn" onclick="check(this, false)">Я хочу перечитать этому роману.</button>
+                <button class="correction-btn" onclick="check(this, false)">Я хочу перечитать этим романом.</button>
+                <button class="correction-btn" onclick="check(this, true)">Я хочу перечитать этот роман.</button>
+            </div>
+            <div class="explanation">Info: перечитать + Akkusativ (Was?).</div>
+        </div>
+
+        <!-- 11. Reflexivfehler -->
+        <div class="error-card">
+            <div class="context-hint">Fehler: Reflexiv vergessen</div>
+            <div class="incorrect-sentence">Книга читает легко.</div>
+            <div class="question">Korrektur (Passiv-Bedeutung):</div>
+            <div class="options-list">
+                <button class="correction-btn" onclick="check(this, true)">Книга читается легко.</button>
+                <button class="correction-btn" onclick="check(this, false)">Книга зачитывает легко.</button>
+                <button class="correction-btn" onclick="check(this, false)">Книгу читается легко.</button>
+            </div>
+            <div class="explanation">Info: читается = "lässt sich lesen" (Reflexiv für Passiv/Eigenschaft).</div>
+        </div>
+
+        <!-- 12. Aspektfehler (Situation) -->
+        <div class="error-card">
+            <div class="context-hint">Fehler: Falscher Aspekt</div>
+            <div class="incorrect-sentence">Вчера он наконец читал книгу до конца.</div>
+            <div class="question">Korrektur (Resultat):</div>
+            <div class="options-list">
+                <button class="correction-btn" onclick="check(this, false)">... он наконец почитывал книгу.</button>
+                <button class="correction-btn" onclick="check(this, true)">... он наконец дочитал книгу.</button>
+                <button class="correction-btn" onclick="check(this, false)">... он наконец вчитывался в книгу.</button>
+            </div>
+            <div class="explanation">Info: наконец (endlich) + Resultat = SV (дочитал).</div>
+        </div>
+
+    </div>
+
+    <div class="controls">
+        <button class="ctrl-btn reset" onclick="resetAll()">Zurücksetzen</button>
+        <button class="ctrl-btn solve" onclick="showSolutions()">Lösungen anzeigen</button>
+    </div>
+</div>
+
+<script>
+    function check(btn, isCorrect) {
+        const card = btn.closest('.error-card');
+        
+        if (card.classList.contains('solved')) return;
+
+        if (isCorrect) {
+            btn.classList.add('correct');
+            card.classList.add('solved');
+        } else {
+            btn.classList.add('wrong');
+            // Karte sperren und Lösung zeigen
+            card.classList.add('solved');
+            
+            // Richtige Antwort finden
+            const allBtns = card.querySelectorAll('.correction-btn');
+            allBtns.forEach(b => {
+                if(b.getAttribute('onclick').includes('true')) {
+                    b.classList.add('correct');
+                }
+            });
+        }
+    }
+
+    function resetAll() {
+        const cards = document.querySelectorAll('.error-card');
+        cards.forEach(card => {
+            card.classList.remove('solved');
+            const btns = card.querySelectorAll('.correction-btn');
+            btns.forEach(b => {
+                b.classList.remove('correct', 'wrong');
+            });
+        });
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function showSolutions() {
+        resetAll();
+        const cards = document.querySelectorAll('.error-card');
+        cards.forEach(card => {
+            card.classList.add('solved');
+            const btns = card.querySelectorAll('.correction-btn');
+            btns.forEach(b => {
+                if(b.getAttribute('onclick').includes('true')) {
+                    b.classList.add('correct');
+                }
+            });
+        });
+    }
+</script>
+
+</body>
+</html>
