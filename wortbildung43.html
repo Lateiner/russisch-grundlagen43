@@ -1,0 +1,514 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Russisch: Wortbildung Baukasten</title>
+    
+    <style>
+        :root {
+            --primary: #2c3e50;
+            --stem-bg: #34495e;
+            --stem-text: #fff;
+            --accent: #3498db;
+            --correct-bg: #d4edda;
+            --correct-border: #28a745;
+            --wrong-bg: #f8d7da;
+            --wrong-border: #dc3545;
+            --bg-body: #eff3f4;
+            --card-bg: #ffffff;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-body);
+            color: #333;
+            margin: 0;
+            padding: 20px;
+            line-height: 1.5;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            color: var(--primary);
+            text-align: center;
+            margin-bottom: 10px;
+        }
+
+        .instruction {
+            text-align: center;
+            color: #555;
+            margin-bottom: 30px;
+            font-style: italic;
+        }
+
+        /* Grid für die Aufgaben */
+        .grid-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 20px;
+        }
+
+        .builder-card {
+            background: var(--card-bg);
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            border: 1px solid #e1e1e1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .context {
+            font-size: 0.95rem;
+            color: #666;
+            margin-bottom: 15px;
+            border-bottom: 1px solid #f0f0f0;
+            padding-bottom: 10px;
+            height: 45px; /* Fixe Höhe für Alignment */
+        }
+
+        .sentence-part {
+            font-size: 1.1rem;
+            margin-bottom: 10px;
+            font-weight: 500;
+        }
+
+        /* Der Baukasten-Container */
+        .word-builder {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 5px;
+            background-color: #f8f9fa;
+            padding: 10px;
+            border-radius: 8px;
+            border: 1px dashed #ccc;
+            flex-wrap: wrap; /* Wichtig für Mobile */
+        }
+
+        /* Die Select-Boxen (Präfix & Suffix) */
+        select {
+            padding: 8px 5px;
+            font-size: 1rem;
+            border: 2px solid #bdc3c7;
+            border-radius: 6px;
+            background-color: white;
+            cursor: pointer;
+            text-align: center;
+            min-width: 70px;
+            font-weight: bold;
+            color: var(--primary);
+            appearance: none; /* Entfernt Standard-Pfeil in manchen Browsern für cleaneren Look */
+            -webkit-appearance: none;
+            background-image: url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%23007CB2%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E");
+            background-repeat: no-repeat;
+            background-position: right .7em top 50%;
+            background-size: .65em auto;
+            padding-right: 1.5em;
+        }
+
+        select:focus {
+            outline: none;
+            border-color: var(--accent);
+        }
+
+        /* Der feste Stamm */
+        .stem-box {
+            background-color: var(--stem-bg);
+            color: var(--stem-text);
+            padding: 8px 12px;
+            border-radius: 4px;
+            font-weight: bold;
+            font-size: 1.1rem;
+            letter-spacing: 1px;
+            user-select: none;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+
+        /* Feedback Styles */
+        select.correct {
+            border-color: var(--correct-border);
+            background-color: var(--correct-bg);
+            color: #155724;
+        }
+
+        select.incorrect {
+            border-color: var(--wrong-border);
+            background-color: var(--wrong-bg);
+            color: #721c24;
+        }
+
+        /* Controls */
+        .controls {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            margin-top: 40px;
+            padding-top: 20px;
+            border-top: 1px solid #ddd;
+        }
+
+        button.ctrl-btn {
+            padding: 12px 30px;
+            border: none;
+            border-radius: 6px;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            color: white;
+            transition: transform 0.1s;
+        }
+
+        button.reset { background-color: #95a5a6; }
+        button.reset:hover { background-color: #7f8c8d; }
+
+        button.solve { background-color: #f39c12; }
+        button.solve:hover { background-color: #d35400; }
+
+        @media (max-width: 450px) {
+            .word-builder {
+                justify-content: space-between;
+            }
+            select {
+                flex-grow: 1;
+            }
+            .controls {
+                flex-direction: column;
+            }
+            button.ctrl-btn {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>Wort-Baukasten</h1>
+    <p class="instruction">Bauen Sie das richtige Verb für den Kontext zusammen. <br>Wählen Sie links das <strong>Präfix</strong> und rechts die <strong>Endung</strong>.</p>
+
+    <div class="grid-container">
+
+        <!-- 1. Resultat (про-) -->
+        <div class="builder-card" data-p="про" data-s="ал">
+            <div class="context">Er hat das Buch komplett gelesen (Resultat).</div>
+            <div class="sentence-part">Он... книгу.</div>
+            <div class="word-builder">
+                <select class="prefix" onchange="checkCard(this)">
+                    <option value="">?</option>
+                    <option value="про">про</option>
+                    <option value="по">по</option>
+                    <option value="до">до</option>
+                </select>
+                <div class="stem">-чит-</div>
+                <select class="suffix" onchange="checkCard(this)">
+                    <option value="">?</option>
+                    <option value="ал">ал</option>
+                    <option value="ался">ался</option>
+                    <option value="ывал">ывал</option>
+                </select>
+            </div>
+        </div>
+
+        <!-- 2. Wiederholung (пере-) -->
+        <div class="builder-card" data-p="пере" data-s="ал">
+            <div class="context">Er hat den Brief noch einmal gelesen.</div>
+            <div class="sentence-part">Он... письмо.</div>
+            <div class="word-builder">
+                <select class="prefix" onchange="checkCard(this)">
+                    <option value="">?</option>
+                    <option value="вы">вы</option>
+                    <option value="пере">пере</option>
+                    <option value="за">за</option>
+                </select>
+                <div class="stem">-чит-</div>
+                <select class="suffix" onchange="checkCard(this)">
+                    <option value="">?</option>
+                    <option value="ал">ал</option>
+                    <option value="ался">ался</option>
+                </select>
+            </div>
+        </div>
+
+        <!-- 3. Ein bisschen (по-) -->
+        <div class="builder-card" data-p="по" data-s="ала">
+            <div class="context">Sie hat am Abend ein bisschen gelesen.</div>
+            <div class="sentence-part">Она вечером...</div>
+            <div class="word-builder">
+                <select class="prefix" onchange="checkCard(this)">
+                    <option value="">?</option>
+                    <option value="до">до</option>
+                    <option value="по">по</option>
+                    <option value="на">на</option>
+                </select>
+                <div class="stem">-чит-</div>
+                <select class="suffix" onchange="checkCard(this)">
+                    <option value="">?</option>
+                    <option value="ала">ала</option>
+                    <option value="алась">алась</option>
+                </select>
+            </div>
+        </div>
+
+        <!-- 4. Zu Ende (до-) -->
+        <div class="builder-card" data-p="до" data-s="ал">
+            <div class="context">Er hat den Roman endlich zu Ende gelesen.</div>
+            <div class="sentence-part">Наконец он... роман.</div>
+            <div class="word-builder">
+                <select class="prefix" onchange="checkCard(this)">
+                    <option value="">?</option>
+                    <option value="до">до</option>
+                    <option value="в">в</option>
+                    <option value="от">от</option>
+                </select>
+                <div class="stem">-чит-</div>
+                <select class="suffix" onchange="checkCard(this)">
+                    <option value="">?</option>
+                    <option value="ал">ал</option>
+                    <option value="ался">ался</option>
+                </select>
+            </div>
+        </div>
+
+        <!-- 5. Satt gelesen (на- ... -ся) -->
+        <div class="builder-card" data-p="на" data-s="ался">
+            <div class="context">Er hat sich an Comics sattgelesen (will nicht mehr).</div>
+            <div class="sentence-part">Он... комиксов.</div>
+            <div class="word-builder">
+                <select class="prefix" onchange="checkCard(this)">
+                    <option value="">?</option>
+                    <option value="за">за</option>
+                    <option value="на">на</option>
+                    <option value="вы">вы</option>
+                </select>
+                <div class="stem">-чит-</div>
+                <select class="suffix" onchange="checkCard(this)">
+                    <option value="">?</option>
+                    <option value="ал">ал</option>
+                    <option value="ался">ался</option>
+                </select>
+            </div>
+        </div>
+
+        <!-- 6. Festgelesen (за- ... -ся) -->
+        <div class="builder-card" data-p="за" data-s="алась">
+            <div class="context">Sie hat sich festgelesen und die Zeit vergessen.</div>
+            <div class="sentence-part">Она... и забыла о времени.</div>
+            <div class="word-builder">
+                <select class="prefix" onchange="checkCard(this)">
+                    <option value="">?</option>
+                    <option value="на">на</option>
+                    <option value="за">за</option>
+                    <option value="с">с</option>
+                </select>
+                <div class="stem">-чит-</div>
+                <select class="suffix" onchange="checkCard(this)">
+                    <option value="">?</option>
+                    <option value="ала">ала</option>
+                    <option value="алась">алась</option>
+                </select>
+            </div>
+        </div>
+
+        <!-- 7. Vertiefen (в- ... -ся) -->
+        <div class="builder-card" data-p="в" data-s="ался">
+            <div class="context">Er vertiefte sich in die Details des Vertrags.</div>
+            <div class="sentence-part">Он... в детали договора.</div>
+            <div class="word-builder">
+                <select class="prefix" onchange="checkCard(this)">
+                    <option value="">?</option>
+                    <option value="в">в</option>
+                    <option value="с">с</option>
+                    <option value="вы">вы</option>
+                </select>
+                <div class="stem">-чит-</div>
+                <select class="suffix" onchange="checkCard(this)">
+                    <option value="">?</option>
+                    <option value="ал">ал</option>
+                    <option value="ался">ался</option>
+                </select>
+            </div>
+        </div>
+
+        <!-- 8. Vorlesen/Verkünden (за-) -->
+        <div class="builder-card" data-p="за" data-s="ал">
+            <div class="context">Der Offizier hat den Befehl verlesen.</div>
+            <div class="sentence-part">Офицер... приказ.</div>
+            <div class="word-builder">
+                <select class="prefix" onchange="checkCard(this)">
+                    <option value="">?</option>
+                    <option value="на">на</option>
+                    <option value="за">за</option>
+                    <option value="в">в</option>
+                </select>
+                <div class="stem">-чит-</div>
+                <select class="suffix" onchange="checkCard(this)">
+                    <option value="">?</option>
+                    <option value="ал">ал</option>
+                    <option value="ался">ался</option>
+                </select>
+            </div>
+        </div>
+
+        <!-- 9. Aufsprechen (на-) -->
+        <div class="builder-card" data-p="на" data-s="ал">
+            <div class="context">Er hat den Text auf das Diktiergerät gesprochen.</div>
+            <div class="sentence-part">Он... текст на диктофон.</div>
+            <div class="word-builder">
+                <select class="prefix" onchange="checkCard(this)">
+                    <option value="">?</option>
+                    <option value="на">на</option>
+                    <option value="вы">вы</option>
+                    <option value="по">по</option>
+                </select>
+                <div class="stem">-чит-</div>
+                <select class="suffix" onchange="checkCard(this)">
+                    <option value="">?</option>
+                    <option value="ал">ал</option>
+                    <option value="ался">ался</option>
+                </select>
+            </div>
+        </div>
+
+        <!-- 10. Korrektur lesen (вы-) -->
+        <div class="builder-card" data-p="вы" data-s="ала">
+            <div class="context">Sie hat alle Fehler im Text gefunden (herausgelesen).</div>
+            <div class="sentence-part">Она... все ошибки.</div>
+            <div class="word-builder">
+                <select class="prefix" onchange="checkCard(this)">
+                    <option value="">?</option>
+                    <option value="вы">вы</option>
+                    <option value="с">с</option>
+                    <option value="от">от</option>
+                </select>
+                <div class="stem">-чит-</div>
+                <select class="suffix" onchange="checkCard(this)">
+                    <option value="">?</option>
+                    <option value="ала">ала</option>
+                    <option value="алась">алась</option>
+                </select>
+            </div>
+        </div>
+
+        <!-- 11. Ausschimpfen (от-) -->
+        <div class="builder-card" data-p="от" data-s="ал">
+            <div class="context">Der Lehrer hat den Schüler ausgeschimpft (Lektion erteilt).</div>
+            <div class="sentence-part">Учитель... ученика.</div>
+            <div class="word-builder">
+                <select class="prefix" onchange="checkCard(this)">
+                    <option value="">?</option>
+                    <option value="под">под</option>
+                    <option value="от">от</option>
+                    <option value="до">до</option>
+                </select>
+                <div class="stem">-чит-</div>
+                <select class="suffix" onchange="checkCard(this)">
+                    <option value="">?</option>
+                    <option value="ал">ал</option>
+                    <option value="ался">ался</option>
+                </select>
+            </div>
+        </div>
+
+        <!-- 12. Ablesen/Scannen (с-) -->
+        <div class="builder-card" data-p="с" data-s="ал">
+            <div class="context">Der Computer hat die Daten abgelesen (gescannt).</div>
+            <div class="sentence-part">Компьютер... данные.</div>
+            <div class="word-builder">
+                <select class="prefix" onchange="checkCard(this)">
+                    <option value="">?</option>
+                    <option value="с">с</option>
+                    <option value="в">в</option>
+                    <option value="на">на</option>
+                </select>
+                <div class="stem">-чит-</div>
+                <select class="suffix" onchange="checkCard(this)">
+                    <option value="">?</option>
+                    <option value="ал">ал</option>
+                    <option value="ался">ался</option>
+                </select>
+            </div>
+        </div>
+
+    </div>
+
+    <div class="controls">
+        <button class="ctrl-btn reset" onclick="resetAll()">Zurücksetzen</button>
+        <button class="ctrl-btn solve" onclick="showSolutions()">Lösungen anzeigen</button>
+    </div>
+</div>
+
+<script>
+    function checkCard(selectElement) {
+        // Finde die Eltern-Karte
+        const card = selectElement.closest('.builder-card');
+        
+        // Hole die erwarteten Werte
+        const expectedPrefix = card.dataset.p;
+        const expectedSuffix = card.dataset.s;
+        
+        // Hole die aktuellen Werte
+        const prefixSelect = card.querySelector('.prefix');
+        const suffixSelect = card.querySelector('.suffix');
+        
+        // Validierung Präfix
+        if (prefixSelect.value !== "") {
+            if (prefixSelect.value === expectedPrefix) {
+                prefixSelect.classList.add('correct');
+                prefixSelect.classList.remove('incorrect');
+            } else {
+                prefixSelect.classList.add('incorrect');
+                prefixSelect.classList.remove('correct');
+            }
+        } else {
+            prefixSelect.classList.remove('correct', 'incorrect');
+        }
+
+        // Validierung Suffix
+        if (suffixSelect.value !== "") {
+            if (suffixSelect.value === expectedSuffix) {
+                suffixSelect.classList.add('correct');
+                suffixSelect.classList.remove('incorrect');
+            } else {
+                suffixSelect.classList.add('incorrect');
+                suffixSelect.classList.remove('correct');
+            }
+        } else {
+            suffixSelect.classList.remove('correct', 'incorrect');
+        }
+    }
+
+    function resetAll() {
+        const selects = document.querySelectorAll('select');
+        selects.forEach(sel => {
+            sel.value = "";
+            sel.classList.remove('correct', 'incorrect');
+        });
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function showSolutions() {
+        const cards = document.querySelectorAll('.builder-card');
+        cards.forEach(card => {
+            const expectedPrefix = card.dataset.p;
+            const expectedSuffix = card.dataset.s;
+            
+            const prefixSelect = card.querySelector('.prefix');
+            const suffixSelect = card.querySelector('.suffix');
+            
+            prefixSelect.value = expectedPrefix;
+            suffixSelect.value = expectedSuffix;
+            
+            // Trigger visual update
+            checkCard(prefixSelect);
+        });
+    }
+</script>
+
+</body>
+</html>
