@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Russisch: Synonyme & Präfixe finden</title>
+    
+    <style>
+        :root {
+            --primary: #2c3e50;
+            --accent: #3498db;
+            --correct: #27ae60;
+            --wrong: #c0392b;
+            --bg-body: #f0f2f5;
+            --card-bg: #ffffff;
+            --text-color: #333;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-body);
+            color: var(--text-color);
+            margin: 0;
+            padding: 20px;
+            line-height: 1.5;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            color: var(--primary);
+            text-align: center;
+            margin-bottom: 10px;
+        }
+
+        .instruction {
+            text-align: center;
+            color: #666;
+            margin-bottom: 30px;
+            font-style: italic;
+        }
+
+        /* Grid für die Aufgabenkarten */
+        .cards-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 20px;
+        }
+
+        .task-card {
+            background: var(--card-bg);
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            border: 1px solid #e1e1e1;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        /* Der deutsche Kontext-Satz */
+        .context-de {
+            color: var(--accent);
+            font-weight: 600;
+            font-size: 0.95rem;
+            margin-bottom: 10px;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 8px;
+        }
+
+        /* Der russische Satz mit Lücke */
+        .sentence-ru {
+            font-size: 1.2rem;
+            margin-bottom: 20px;
+            font-weight: 500;
+            line-height: 1.6;
+        }
+
+        /* Die Lücke selbst */
+        .gap {
+            display: inline-block;
+            min-width: 80px;
+            border-bottom: 2px solid #aaa;
+            color: var(--primary);
+            text-align: center;
+            padding: 0 5px;
+            transition: all 0.3s ease;
+        }
+
+        .gap.filled {
+            border-bottom-color: var(--correct);
+            color: var(--correct);
+            font-weight: bold;
+        }
+
+        /* Auswahl-Buttons (Chips) */
+        .options-area {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .choice-btn {
+            flex: 1;
+            white-space: nowrap;
+            background-color: #f8f9fa;
+            border: 1px solid #ced4da;
+            border-radius: 20px;
+            padding: 10px 15px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            color: #495057;
+            text-align: center;
+            user-select: none;
+        }
+
+        .choice-btn:hover {
+            background-color: #e9ecef;
+            transform: translateY(-1px);
+        }
+
+        /* Feedback-Zustände */
+        .choice-btn.correct {
+            background-color: var(--correct);
+            color: white;
+            border-color: var(--correct);
+            pointer-events: none;
+        }
+
+        .choice-btn.wrong {
+            background-color: var(--wrong);
+            color: white;
+            border-color: var(--wrong);
+            opacity: 0.5;
+            pointer-events: none; /* Verhindert Mehrfachklicks auf Falsches */
+        }
+
+        /* Deaktiviert (wenn Aufgabe gelöst) */
+        .task-card.solved .choice-btn:not(.correct) {
+            opacity: 0.4;
+            pointer-events: none;
+        }
+
+        /* Steuerungs-Buttons */
+        .controls {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            margin-top: 40px;
+            padding-top: 20px;
+            border-top: 1px solid #ddd;
+        }
+
+        button.ctrl-btn {
+            padding: 12px 30px;
+            border: none;
+            border-radius: 6px;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            color: white;
+            transition: transform 0.1s;
+        }
+
+        button.reset { background-color: #95a5a6; }
+        button.reset:hover { background-color: #7f8c8d; }
+
+        button.solve { background-color: #f39c12; }
+        button.solve:hover { background-color: #d35400; }
+
+        @media (max-width: 600px) {
+            .cards-grid {
+                grid-template-columns: 1fr;
+            }
+            .controls {
+                flex-direction: column;
+            }
+            button.ctrl-btn {
+                width: 100%;
+            }
+            .choice-btn {
+                width: 100%; /* Auf Handy volle Breite für leichteres Tippen */
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>Synonyme & Kontext</h1>
+    <p class="instruction">Welches russische Verb entspricht der deutschen Beschreibung? Klicken Sie auf das richtige Wort.</p>
+
+    <div class="cards-grid">
+
+        <!-- 1. Laut vorlesen -->
+        <div class="task-card" id="c1" data-correct="зачитал">
+            <div class="context-de">Er las das Dokument laut vor (verkündete es).</div>
+            <div class="sentence-ru">Он <span class="gap">...</span> документ.</div>
+            <div class="options-area">
+                <button class="choice-btn" onclick="checkAnswer('c1', 'прочитал')">прочитал</button>
+                <button class="choice-btn" onclick="checkAnswer('c1', 'зачитал')">зачитал</button>
+                <button class="choice-btn" onclick="checkAnswer('c1', 'почитал')">почитал</button>
+            </div>
+        </div>
+
+        <!-- 2. Bis zum Ende lesen -->
+        <div class="task-card" id="c2" data-correct="дочитала">
+            <div class="context-de">Sie las das Buch bis zur letzten Seite.</div>
+            <div class="sentence-ru">Она <span class="gap">...</span> книгу.</div>
+            <div class="options-area">
+                <button class="choice-btn" onclick="checkAnswer('c2', 'дочитала')">дочитала</button>
+                <button class="choice-btn" onclick="checkAnswer('c2', 'прочитала')">прочитала</button>
+                <button class="choice-btn" onclick="checkAnswer('c2', 'отчитала')">отчитала</button>
+            </div>
+        </div>
+
+        <!-- 3. Noch einmal lesen -->
+        <div class="task-card" id="c3" data-correct="перечитываю">
+            <div class="context-de">Ich lese meine Lieblingsbücher oft erneut.</div>
+            <div class="sentence-ru">Я часто <span class="gap">...</span> любимые книги.</div>
+            <div class="options-area">
+                <button class="choice-btn" onclick="checkAnswer('c3', 'начитываю')">начитываю</button>
+                <button class="choice-btn" onclick="checkAnswer('c3', 'считываю')">считываю</button>
+                <button class="choice-btn" onclick="checkAnswer('c3', 'перечитываю')">перечитываю</button>
+            </div>
+        </div>
+
+        <!-- 4. Herauslesen / Finden -->
+        <div class="task-card" id="c4" data-correct="вычитал">
+            <div class="context-de">Er fand (las heraus) eine interessante Tatsache im Artikel.</div>
+            <div class="sentence-ru">Он <span class="gap">...</span> интересный факт.</div>
+            <div class="options-area">
+                <button class="choice-btn" onclick="checkAnswer('c4', 'вычитал')">вычитал</button>
+                <button class="choice-btn" onclick="checkAnswer('c4', 'вчитал')">вчитал</button>
+                <button class="choice-btn" onclick="checkAnswer('c4', 'зачитал')">зачитал</button>
+            </div>
+        </div>
+
+        <!-- 5. Ein bisschen lesen -->
+        <div class="task-card" id="c5" data-correct="почитать">
+            <div class="context-de">Ich möchte vor dem Schlafen ein wenig lesen.</div>
+            <div class="sentence-ru">Я хочу <span class="gap">...</span> перед сном.</div>
+            <div class="options-area">
+                <button class="choice-btn" onclick="checkAnswer('c5', 'прочитать')">прочитать</button>
+                <button class="choice-btn" onclick="checkAnswer('c5', 'дочитать')">дочитать</button>
+                <button class="choice-btn" onclick="checkAnswer('c5', 'почитать')">почитать</button>
+            </div>
+        </div>
+
+        <!-- 6. Sich vertiefen -->
+        <div class="task-card" id="c6" data-correct="вчитаться">
+            <div class="context-de">Man muss sich in diesen Text hineindenken (vertiefen).</div>
+            <div class="sentence-ru">В этот текст надо <span class="gap">...</span>.</div>
+            <div class="options-area">
+                <button class="choice-btn" onclick="checkAnswer('c6', 'считаться')">считаться</button>
+                <button class="choice-btn" onclick="checkAnswer('c6', 'вчитаться')">вчитаться</button>
+                <button class="choice-btn" onclick="checkAnswer('c6', 'начитаться')">начитаться</button>
+            </div>
+        </div>
+
+        <!-- 7. Sich sattlesen / Genug haben -->
+        <div class="task-card" id="c7" data-correct="начитался">
+            <div class="context-de">Er hat genug von Krimis (will keine mehr lesen).</div>
+            <div class="sentence-ru">Он <span class="gap">...</span> детективов.</div>
+            <div class="options-area">
+                <button class="choice-btn" onclick="checkAnswer('c7', 'зачитался')">зачитался</button>
+                <button class="choice-btn" onclick="checkAnswer('c7', 'начитался')">начитался</button>
+                <button class="choice-btn" onclick="checkAnswer('c7', 'перечитался')">перечитался</button>
+            </div>
+        </div>
+
+        <!-- 8. Sich festlesen / Zeit vergessen -->
+        <div class="task-card" id="c8" data-correct="зачиталась">
+            <div class="context-de">Sie vergaß die Zeit beim Lesen.</div>
+            <div class="sentence-ru">Она <span class="gap">...</span> и забыла о времени.</div>
+            <div class="options-area">
+                <button class="choice-btn" onclick="checkAnswer('c8', 'зачиталась')">зачиталась</button>
+                <button class="choice-btn" onclick="checkAnswer('c8', 'вычиталась')">вычиталась</button>
+                <button class="choice-btn" onclick="checkAnswer('c8', 'отчиталась')">отчиталась</button>
+            </div>
+        </div>
+
+        <!-- 9. Aufsprechen (Audio) -->
+        <div class="task-card" id="c9" data-correct="начитал">
+            <div class="context-de">Der Autor hat das Hörbuch selbst aufgenommen (aufgesprochen).</div>
+            <div class="sentence-ru">Автор сам <span class="gap">...</span> аудиокнигу.</div>
+            <div class="options-area">
+                <button class="choice-btn" onclick="checkAnswer('c9', 'прочитал')">прочитал</button>
+                <button class="choice-btn" onclick="checkAnswer('c9', 'начитал')">начитал</button>
+                <button class="choice-btn" onclick="checkAnswer('c9', 'зачитал')">зачитал</button>
+            </div>
+        </div>
+
+        <!-- 10. Korrektur lesen -->
+        <div class="task-card" id="c10" data-correct="вычитать">
+            <div class="context-de">Wir müssen den Fehler im Vertrag finden (korrigieren).</div>
+            <div class="sentence-ru">Нам нужно <span class="gap">...</span> договор.</div>
+            <div class="options-area">
+                <button class="choice-btn" onclick="checkAnswer('c10', 'вычитать')">вычитать</button>
+                <button class="choice-btn" onclick="checkAnswer('c10', 'считать')">считать</button>
+                <button class="choice-btn" onclick="checkAnswer('c10', 'перечитать')">перечитать</button>
+            </div>
+        </div>
+
+        <!-- 11. Ausschimpfen (Standpauke) -->
+        <div class="task-card" id="c11" data-correct="отчитал">
+            <div class="context-de">Der Vater hat den Sohn ausgeschimpft (Lektion erteilt).</div>
+            <div class="sentence-ru">Отец <span class="gap">...</span> сына.</div>
+            <div class="options-area">
+                <button class="choice-btn" onclick="checkAnswer('c11', 'дочитал')">дочитал</button>
+                <button class="choice-btn" onclick="checkAnswer('c11', 'отчитал')">отчитал</button>
+                <button class="choice-btn" onclick="checkAnswer('c11', 'прочитал')">прочитал</button>
+            </div>
+        </div>
+
+        <!-- 12. Ablesen / Scannen -->
+        <div class="task-card" id="c12" data-correct="считал">
+            <div class="context-de">Der Scanner hat den Code eingelesen (abgelesen).</div>
+            <div class="sentence-ru">Сканер <span class="gap">...</span> код.</div>
+            <div class="options-area">
+                <button class="choice-btn" onclick="checkAnswer('c12', 'считал')">считал</button>
+                <button class="choice-btn" onclick="checkAnswer('c12', 'вычитал')">вычитал</button>
+                <button class="choice-btn" onclick="checkAnswer('c12', 'начитал')">начитал</button>
+            </div>
+        </div>
+
+    </div>
+
+    <div class="controls">
+        <button class="ctrl-btn reset" onclick="resetAll()">Zurücksetzen</button>
+        <button class="ctrl-btn solve" onclick="showSolutions()">Lösungen anzeigen</button>
+    </div>
+</div>
+
+<script>
+    function checkAnswer(cardId, selectedValue) {
+        const card = document.getElementById(cardId);
+        
+        // Wenn schon gelöst, nichts tun
+        if (card.classList.contains('solved')) return;
+
+        const correctValue = card.dataset.correct;
+        const gap = card.querySelector('.gap');
+        const buttons = card.querySelectorAll('.choice-btn');
+        
+        // Welcher Button wurde geklickt?
+        let clickedBtn;
+        buttons.forEach(btn => {
+            if (btn.innerText === selectedValue) {
+                clickedBtn = btn;
+            }
+        });
+
+        if (selectedValue === correctValue) {
+            // RICHTIG
+            card.classList.add('solved');
+            clickedBtn.classList.add('correct');
+            
+            // Lücke füllen
+            gap.textContent = correctValue;
+            gap.classList.add('filled');
+            
+        } else {
+            // FALSCH
+            clickedBtn.classList.add('wrong');
+            // Button schütteln oder ähnliches Feedback ist hier über CSS gelöst (rot)
+        }
+    }
+
+    function resetAll() {
+        const cards = document.querySelectorAll('.task-card');
+        
+        cards.forEach(card => {
+            card.classList.remove('solved');
+            
+            // Lücke zurücksetzen
+            const gap = card.querySelector('.gap');
+            gap.textContent = "...";
+            gap.classList.remove('filled');
+            
+            // Buttons zurücksetzen
+            const buttons = card.querySelectorAll('.choice-btn');
+            buttons.forEach(btn => {
+                btn.classList.remove('correct', 'wrong');
+            });
+        });
+        
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function showSolutions() {
+        // Erst resetten
+        resetAll();
+        
+        const cards = document.querySelectorAll('.task-card');
+        cards.forEach(card => {
+            const correctValue = card.dataset.correct;
+            
+            // Logik der Funktion 'checkAnswer' simulieren für die richtige Antwort
+            checkAnswer(card.id, correctValue);
+        });
+    }
+</script>
+
+</body>
+</html>
