@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Russisch: Situation & Reaktion</title>
+    
+    <style>
+        :root {
+            --primary: #2c3e50;
+            --accent: #3498db;
+            --correct-bg: #d4edda;
+            --correct-border: #28a745;
+            --correct-text: #155724;
+            --wrong-bg: #f8d7da;
+            --wrong-border: #dc3545;
+            --wrong-text: #721c24;
+            --bg-body: #fdfbf7;
+            --card-bg: #ffffff;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-body);
+            color: #333;
+            margin: 0;
+            padding: 20px;
+            line-height: 1.5;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            color: var(--primary);
+            text-align: center;
+            margin-bottom: 10px;
+        }
+
+        .instruction {
+            text-align: center;
+            color: #666;
+            margin-bottom: 30px;
+            font-style: italic;
+        }
+
+        /* Grid Layout */
+        .cards-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+        }
+
+        .situation-card {
+            background: var(--card-bg);
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.05);
+            border: 1px solid #eee;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            transition: transform 0.2s;
+        }
+
+        .situation-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0,0,0,0.08);
+        }
+
+        /* Der Situations-Text (Deutsch) */
+        .situation-text {
+            font-weight: 600;
+            color: var(--primary);
+            margin-bottom: 15px;
+            border-bottom: 2px solid #f0f0f0;
+            padding-bottom: 10px;
+            min-height: 50px;
+        }
+
+        .question {
+            font-size: 0.9rem;
+            color: #888;
+            margin-bottom: 10px;
+            font-style: italic;
+        }
+
+        /* Antwort-Buttons */
+        .options-stack {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .reaction-btn {
+            background-color: #f8f9fa;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            padding: 12px;
+            text-align: left;
+            cursor: pointer;
+            font-size: 1.05rem; /* Etwas größer für bessere Lesbarkeit des Russischen */
+            transition: all 0.2s;
+            color: #495057;
+            position: relative;
+        }
+
+        .reaction-btn:hover {
+            background-color: #e2e6ea;
+            border-color: var(--accent);
+        }
+
+        /* Feedback Styles */
+        .reaction-btn.correct {
+            background-color: var(--correct-bg);
+            border-color: var(--correct-border);
+            color: var(--correct-text);
+            font-weight: bold;
+        }
+
+        .reaction-btn.correct::after {
+            content: "✔";
+            position: absolute;
+            right: 15px;
+            font-size: 1.2rem;
+        }
+
+        .reaction-btn.wrong {
+            background-color: var(--wrong-bg);
+            border-color: var(--wrong-border);
+            color: var(--wrong-text);
+            opacity: 0.7;
+        }
+
+        /* Wenn Karte gelöst ist, andere Buttons deaktivieren */
+        .situation-card.solved .reaction-btn {
+            pointer-events: none;
+        }
+        
+        .situation-card.solved .reaction-btn:not(.correct):not(.wrong) {
+            opacity: 0.5;
+        }
+
+        /* Controls */
+        .controls {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            margin-top: 40px;
+            padding-top: 20px;
+            border-top: 1px solid #ddd;
+        }
+
+        button.ctrl-btn {
+            padding: 12px 30px;
+            border: none;
+            border-radius: 6px;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            color: white;
+            transition: transform 0.1s;
+        }
+
+        button.reset { background-color: #95a5a6; }
+        button.reset:hover { background-color: #7f8c8d; }
+
+        button.solve { background-color: #f39c12; }
+        button.solve:hover { background-color: #d35400; }
+
+        @media (max-width: 600px) {
+            .cards-grid {
+                grid-template-columns: 1fr;
+            }
+            .controls {
+                flex-direction: column;
+            }
+            button.ctrl-btn {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>Situation & Reaktion</h1>
+    <p class="instruction">Lesen Sie die Situation. Wie reagieren Sie logisch? Wählen Sie den passenden russischen Satz.</p>
+
+    <div class="cards-grid">
+
+        <!-- 1. Nicht verstanden -->
+        <div class="situation-card" id="s1">
+            <div class="situation-text">Du hast den Text beim ersten Mal nicht verstanden.</div>
+            <div class="question">Was machst du?</div>
+            <div class="options-stack">
+                <button class="reaction-btn" onclick="check(this, false)">Я дочитаю его.</button>
+                <button class="reaction-btn" onclick="check(this, true)">Я перечитаю его.</button>
+                <button class="reaction-btn" onclick="check(this, false)">Я зачитаю его.</button>
+            </div>
+        </div>
+
+        <!-- 2. Wenig Zeit -->
+        <div class="situation-card" id="s2">
+            <div class="situation-text">Du hast nur 10 Minuten Zeit vor dem Schlafen.</div>
+            <div class="question">Was machst du?</div>
+            <div class="options-stack">
+                <button class="reaction-btn" onclick="check(this, true)">Я немного почитаю.</button>
+                <button class="reaction-btn" onclick="check(this, false)">Я прочитаю книгу.</button>
+                <button class="reaction-btn" onclick="check(this, false)">Я вычитаю книгу.</button>
+            </div>
+        </div>
+
+        <!-- 3. Langweilig -->
+        <div class="situation-card" id="s3">
+            <div class="situation-text">Das Buch ist schrecklich langweilig. Du willst aufhören.</div>
+            <div class="question">Was sagst du?</div>
+            <div class="options-stack">
+                <button class="reaction-btn" onclick="check(this, false)">Я перечитаю книгу.</button>
+                <button class="reaction-btn" onclick="check(this, true)">Я не дочитаю книгу.</button>
+                <button class="reaction-btn" onclick="check(this, false)">Я вчитаюсь в книгу.</button>
+            </div>
+        </div>
+
+        <!-- 4. Zitat suchen -->
+        <div class="situation-card" id="s4">
+            <div class="situation-text">Du brauchst ein bestimmtes Zitat für deine Arbeit.</div>
+            <div class="question">Was machst du?</div>
+            <div class="options-stack">
+                <button class="reaction-btn" onclick="check(this, false)">Я начитаю цитату.</button>
+                <button class="reaction-btn" onclick="check(this, false)">Я зачитаюсь.</button>
+                <button class="reaction-btn" onclick="check(this, true)">Я вычитаю цитату.</button>
+            </div>
+        </div>
+
+        <!-- 5. Hörbuch -->
+        <div class="situation-card" id="s5">
+            <div class="situation-text">Du möchtest ein Hörbuch für deine Kinder aufnehmen.</div>
+            <div class="question">Was machst du?</div>
+            <div class="options-stack">
+                <button class="reaction-btn" onclick="check(this, true)">Я начитаю сказку.</button>
+                <button class="reaction-btn" onclick="check(this, false)">Я отчитаю сказку.</button>
+                <button class="reaction-btn" onclick="check(this, false)">Я дочитаю сказку.</button>
+            </div>
+        </div>
+
+        <!-- 6. Spannendes Buch -->
+        <div class="situation-card" id="s6">
+            <div class="situation-text">Der Roman ist so spannend, dass du alles um dich herum vergisst.</div>
+            <div class="question">Was passiert?</div>
+            <div class="options-stack">
+                <button class="reaction-btn" onclick="check(this, false)">Я начитаюсь.</button>
+                <button class="reaction-btn" onclick="check(this, true)">Я зачитаюсь.</button>
+                <button class="reaction-btn" onclick="check(this, false)">Я вычитаюсь.</button>
+            </div>
+        </div>
+
+        <!-- 7. Offizieller Befehl -->
+        <div class="situation-card" id="s7">
+            <div class="situation-text">Du bist Offizier und musst den Soldaten einen Befehl mitteilen.</div>
+            <div class="question">Was machst du?</div>
+            <div class="options-stack">
+                <button class="reaction-btn" onclick="check(this, true)">Я зачитаю приказ.</button>
+                <button class="reaction-btn" onclick="check(this, false)">Я вчитаю приказ.</button>
+                <button class="reaction-btn" onclick="check(this, false)">Я почитаю приказ.</button>
+            </div>
+        </div>
+
+        <!-- 8. Komplizierter Vertrag -->
+        <div class="situation-card" id="s8">
+            <div class="situation-text">Der Vertrag ist sehr kompliziert und kleingedruckt.</div>
+            <div class="question">Was musst du tun?</div>
+            <div class="options-stack">
+                <button class="reaction-btn" onclick="check(this, false)">Мне нужно считать.</button>
+                <button class="reaction-btn" onclick="check(this, true)">Мне нужно вчитаться.</button>
+                <button class="reaction-btn" onclick="check(this, false)">Мне нужно дочитать.</button>
+            </div>
+        </div>
+
+        <!-- 9. Zu viele schlechte Nachrichten -->
+        <div class="situation-card" id="s9">
+            <div class="situation-text">Du hast stundenlang schlechte Nachrichten gelesen und fühlst dich unwohl.</div>
+            <div class="question">Was ist passiert?</div>
+            <div class="options-stack">
+                <button class="reaction-btn" onclick="check(this, false)">Я зачитался.</button>
+                <button class="reaction-btn" onclick="check(this, true)">Я начитался.</button>
+                <button class="reaction-btn" onclick="check(this, false)">Я прочитал.</button>
+            </div>
+        </div>
+
+        <!-- 10. Fehler finden -->
+        <div class="situation-card" id="s10">
+            <div class="situation-text">Dein Freund bittet dich, Fehler in seinem Essay zu finden.</div>
+            <div class="question">Was wirst du tun?</div>
+            <div class="options-stack">
+                <button class="reaction-btn" onclick="check(this, true)">Я вычитаю текст.</button>
+                <button class="reaction-btn" onclick="check(this, false)">Я начитаю текст.</button>
+                <button class="reaction-btn" onclick="check(this, false)">Я зачитаю текст.</button>
+            </div>
+        </div>
+
+        <!-- 11. Buch beendet -->
+        <div class="situation-card" id="s11">
+            <div class="situation-text">Du hast die letzte Seite umgeblättert und das Buch geschlossen.</div>
+            <div class="question">Was hast du getan?</div>
+            <div class="options-stack">
+                <button class="reaction-btn" onclick="check(this, false)">Я почитал книгу.</button>
+                <button class="reaction-btn" onclick="check(this, false)">Я перечитал книгу.</button>
+                <button class="reaction-btn" onclick="check(this, true)">Я прочитал книгу.</button>
+            </div>
+        </div>
+
+        <!-- 12. Schimpfen -->
+        <div class="situation-card" id="s12">
+            <div class="situation-text">Dein Sohn hat eine Vase zerbrochen. Du bist wütend und hältst ihm eine Predigt.</div>
+            <div class="question">Was machst du?</div>
+            <div class="options-stack">
+                <button class="reaction-btn" onclick="check(this, false)">Я вычитаю его.</button>
+                <button class="reaction-btn" onclick="check(this, true)">Я отчитаю его.</button>
+                <button class="reaction-btn" onclick="check(this, false)">Я начитаю его.</button>
+            </div>
+        </div>
+
+    </div>
+
+    <div class="controls">
+        <button class="ctrl-btn reset" onclick="resetAll()">Zurücksetzen</button>
+        <button class="ctrl-btn solve" onclick="showSolutions()">Lösungen anzeigen</button>
+    </div>
+</div>
+
+<script>
+    function check(btn, isCorrect) {
+        const card = btn.closest('.situation-card');
+        
+        // Verhindern von Mehrfachklicks, wenn schon gelöst
+        if (card.classList.contains('solved')) return;
+
+        if (isCorrect) {
+            btn.classList.add('correct');
+            card.classList.add('solved');
+        } else {
+            btn.classList.add('wrong');
+            // Karte bleibt ungelöst, Nutzer kann noch wählen (optional: sofort sperren)
+            // Hier sperren wir die Karte, um Raten zu verhindern, und zeigen die Lösung:
+            card.classList.add('solved');
+            
+            // Richtige Antwort finden und markieren
+            const allBtns = card.querySelectorAll('.reaction-btn');
+            allBtns.forEach(b => {
+                if(b.getAttribute('onclick').includes('true')) {
+                    b.classList.add('correct');
+                }
+            });
+        }
+    }
+
+    function resetAll() {
+        const cards = document.querySelectorAll('.situation-card');
+        cards.forEach(card => {
+            card.classList.remove('solved');
+            const btns = card.querySelectorAll('.reaction-btn');
+            btns.forEach(b => {
+                b.classList.remove('correct', 'wrong');
+            });
+        });
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function showSolutions() {
+        resetAll();
+        const cards = document.querySelectorAll('.situation-card');
+        cards.forEach(card => {
+            card.classList.add('solved');
+            const btns = card.querySelectorAll('.reaction-btn');
+            btns.forEach(b => {
+                if(b.getAttribute('onclick').includes('true')) {
+                    b.classList.add('correct');
+                }
+            });
+        });
+    }
+</script>
+
+</body>
+</html>
