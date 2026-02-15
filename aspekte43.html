@@ -1,0 +1,454 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Russisch Grammatik: Aspekte (NSV vs. SV)</title>
+    
+    <style>
+        :root {
+            --primary: #2c3e50;
+            --accent: #3498db;
+            --correct: #27ae60;
+            --wrong: #c0392b;
+            --bg-body: #f4f7f6;
+            --card-bg: #ffffff;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-body);
+            color: #333;
+            margin: 0;
+            padding: 20px;
+            line-height: 1.5;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            color: var(--primary);
+            text-align: center;
+            margin-bottom: 10px;
+        }
+
+        .instruction {
+            text-align: center;
+            color: #666;
+            margin-bottom: 30px;
+            font-style: italic;
+        }
+
+        /* Karten-Layout */
+        .task-card {
+            background: var(--card-bg);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            border: 1px solid #e1e1e1;
+        }
+
+        .context-de {
+            color: #555;
+            font-size: 0.95rem;
+            margin-bottom: 10px;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 8px;
+        }
+
+        .signal-word {
+            color: var(--accent);
+            font-weight: bold;
+            text-decoration: underline;
+            text-decoration-style: dotted;
+        }
+
+        .sentence-ru {
+            font-size: 1.2rem;
+            font-weight: 500;
+            margin-bottom: 20px;
+            color: var(--primary);
+        }
+
+        .gap-placeholder {
+            display: inline-block;
+            min-width: 60px;
+            border-bottom: 2px solid #ccc;
+            text-align: center;
+            color: #ccc;
+        }
+
+        /* Buttons für die Aspekt-Wahl */
+        .options-container {
+            display: flex;
+            gap: 15px;
+        }
+
+        .aspect-btn {
+            flex: 1;
+            padding: 12px 10px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            background: #fff;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: all 0.2s;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .aspect-btn span.label {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            color: #999;
+            margin-bottom: 4px;
+        }
+
+        .aspect-btn span.word {
+            font-weight: bold;
+            color: #333;
+        }
+
+        .aspect-btn:hover {
+            border-color: var(--accent);
+            background-color: #f0f8ff;
+        }
+
+        /* Feedback Zustände */
+        .aspect-btn.correct {
+            background-color: var(--correct);
+            border-color: var(--correct);
+        }
+        .aspect-btn.correct span.word, 
+        .aspect-btn.correct span.label {
+            color: white;
+        }
+
+        .aspect-btn.wrong {
+            background-color: var(--wrong);
+            border-color: var(--wrong);
+            opacity: 0.6;
+        }
+        .aspect-btn.wrong span.word, 
+        .aspect-btn.wrong span.label {
+            color: white;
+        }
+
+        /* Deaktivierung nach Antwort */
+        .task-card.answered .aspect-btn {
+            pointer-events: none;
+        }
+
+        /* Controls */
+        .controls {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            margin-top: 40px;
+            padding-top: 20px;
+            border-top: 1px solid #ddd;
+        }
+
+        button.ctrl-btn {
+            padding: 12px 30px;
+            border: none;
+            border-radius: 6px;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            color: white;
+        }
+
+        button.reset { background-color: #95a5a6; }
+        button.reset:hover { background-color: #7f8c8d; }
+
+        button.solve { background-color: #f39c12; }
+        button.solve:hover { background-color: #d35400; }
+
+        @media (max-width: 600px) {
+            .options-container {
+                flex-direction: column;
+                gap: 10px;
+            }
+            .controls {
+                flex-direction: column;
+            }
+            button.ctrl-btn {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>Aspekt-Wahl: NSV oder SV?</h1>
+    <p class="instruction">Entscheiden Sie: Handelt es sich um einen Prozess/Wiederholung (NSV) oder ein Resultat/Einmaligkeit (SV)? Klicken Sie auf das richtige Verb.</p>
+
+    <!-- 1. Basis: Jeden Tag (Wiederholung) -->
+    <div class="task-card" id="t1" data-correct="NSV">
+        <div class="context-de"><span class="signal-word">Jeden Abend</span> las er Zeitung. (Wiederholung)</div>
+        <div class="sentence-ru">Каждый вечер он <span class="gap-placeholder">...</span> газету.</div>
+        <div class="options-container">
+            <button class="aspect-btn" onclick="checkAnswer('t1', 'NSV')">
+                <span class="label">NSV (Imperfekt)</span>
+                <span class="word">читал</span>
+            </button>
+            <button class="aspect-btn" onclick="checkAnswer('t1', 'SV')">
+                <span class="label">SV (Perfekt)</span>
+                <span class="word">прочитал</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- 2. Basis: Gestern (Resultat) -->
+    <div class="task-card" id="t2" data-correct="SV">
+        <div class="context-de">Gestern hat er das Buch <span class="signal-word">endlich</span> zu Ende gelesen. (Resultat)</div>
+        <div class="sentence-ru">Вчера он наконец <span class="gap-placeholder">...</span> книгу.</div>
+        <div class="options-container">
+            <button class="aspect-btn" onclick="checkAnswer('t2', 'NSV')">
+                <span class="label">NSV</span>
+                <span class="word">читал</span>
+            </button>
+            <button class="aspect-btn" onclick="checkAnswer('t2', 'SV')">
+                <span class="label">SV</span>
+                <span class="word">прочитал</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- 3. Prozess: Den ganzen Tag -->
+    <div class="task-card" id="t3" data-correct="NSV">
+        <div class="context-de">Am Sonntag hat sie <span class="signal-word">den ganzen Tag</span> gelesen. (Dauer/Prozess)</div>
+        <div class="sentence-ru">В воскресенье она <span class="gap-placeholder">...</span> весь день.</div>
+        <div class="options-container">
+            <button class="aspect-btn" onclick="checkAnswer('t3', 'NSV')">
+                <span class="label">NSV</span>
+                <span class="word">читала</span>
+            </button>
+            <button class="aspect-btn" onclick="checkAnswer('t3', 'SV')">
+                <span class="label">SV</span>
+                <span class="word">прочитала</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- 4. Resultat: Schon fertig? -->
+    <div class="task-card" id="t4" data-correct="SV">
+        <div class="context-de">Hast du diesen Artikel <span class="signal-word">schon</span> gelesen? (Ist er fertig?)</div>
+        <div class="sentence-ru">Ты <span class="signal-word">уже</span> <span class="gap-placeholder">...</span> эту статью?</div>
+        <div class="options-container">
+            <button class="aspect-btn" onclick="checkAnswer('t4', 'NSV')">
+                <span class="label">NSV</span>
+                <span class="word">читал</span>
+            </button>
+            <button class="aspect-btn" onclick="checkAnswer('t4', 'SV')">
+                <span class="label">SV</span>
+                <span class="word">прочитал</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- 5. Wiederholung: Oft (Präfix пере-) -->
+    <div class="task-card" id="t5" data-correct="NSV">
+        <div class="context-de">Ich habe dieses Buch <span class="signal-word">oft</span> wiedergelesen. (Wiederholung)</div>
+        <div class="sentence-ru">Я <span class="signal-word">часто</span> <span class="gap-placeholder">...</span> эту книгу.</div>
+        <div class="options-container">
+            <button class="aspect-btn" onclick="checkAnswer('t5', 'NSV')">
+                <span class="label">NSV</span>
+                <span class="word">перечитывал</span>
+            </button>
+            <button class="aspect-btn" onclick="checkAnswer('t5', 'SV')">
+                <span class="label">SV</span>
+                <span class="word">перечитал</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- 6. Resultat: Einmal (Präfix пере-) -->
+    <div class="task-card" id="t6" data-correct="SV">
+        <div class="context-de">Er hat den Vertrag noch einmal gelesen und unterschrieben. (Abfolge)</div>
+        <div class="sentence-ru">Он <span class="gap-placeholder">...</span> договор и подписал.</div>
+        <div class="options-container">
+            <button class="aspect-btn" onclick="checkAnswer('t6', 'NSV')">
+                <span class="label">NSV</span>
+                <span class="word">перечитывал</span>
+            </button>
+            <button class="aspect-btn" onclick="checkAnswer('t6', 'SV')">
+                <span class="label">SV</span>
+                <span class="word">перечитал</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- 7. Resultat: Etwas finden (Präfix вы-) -->
+    <div class="task-card" id="t7" data-correct="SV">
+        <div class="context-de"><span class="signal-word">Plötzlich</span> fand (las heraus) er eine wichtige Info. (Einmaliges Resultat)</div>
+        <div class="sentence-ru">Вдруг он <span class="gap-placeholder">...</span> важную информацию.</div>
+        <div class="options-container">
+            <button class="aspect-btn" onclick="checkAnswer('t7', 'NSV')">
+                <span class="label">NSV</span>
+                <span class="word">вычитывал</span>
+            </button>
+            <button class="aspect-btn" onclick="checkAnswer('t7', 'SV')">
+                <span class="label">SV</span>
+                <span class="word">вычитал</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- 8. Prozess: Korrektur lesen (Präfix вы-) -->
+    <div class="task-card" id="t8" data-correct="NSV">
+        <div class="context-de">Der Redakteur hat den Text <span class="signal-word">zwei Stunden lang</span> korrigiert. (Dauer)</div>
+        <div class="sentence-ru">Редактор <span class="gap-placeholder">...</span> текст два часа.</div>
+        <div class="options-container">
+            <button class="aspect-btn" onclick="checkAnswer('t8', 'NSV')">
+                <span class="label">NSV</span>
+                <span class="word">вычитывал</span>
+            </button>
+            <button class="aspect-btn" onclick="checkAnswer('t8', 'SV')">
+                <span class="label">SV</span>
+                <span class="word">вычитал</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- 9. Resultat: Zu Ende (Präfix до-) -->
+    <div class="task-card" id="t9" data-correct="SV">
+        <div class="context-de">Ich kann nicht ins Kino, ich habe das Kapitel noch nicht <span class="signal-word">zu Ende</span> gelesen.</div>
+        <div class="sentence-ru">Я еще не <span class="gap-placeholder">...</span> главу.</div>
+        <div class="options-container">
+            <button class="aspect-btn" onclick="checkAnswer('t9', 'NSV')">
+                <span class="label">NSV</span>
+                <span class="word">дочитывал</span>
+            </button>
+            <button class="aspect-btn" onclick="checkAnswer('t9', 'SV')">
+                <span class="label">SV</span>
+                <span class="word">дочитал</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- 10. Begrenzung: Ein bisschen (Präfix по-) -->
+    <div class="task-card" id="t10" data-correct="SV">
+        <div class="context-de">Er las <span class="signal-word">ein bisschen</span> und ging schlafen. (Kurzzeitig, abgeschlossen)</div>
+        <div class="sentence-ru">Он <span class="gap-placeholder">...</span> и пошел спать.</div>
+        <div class="options-container">
+            <button class="aspect-btn" onclick="checkAnswer('t10', 'NSV')">
+                <span class="label">NSV (Typisch: читал)</span>
+                <span class="word">почитывал</span>
+            </button>
+            <button class="aspect-btn" onclick="checkAnswer('t10', 'SV')">
+                <span class="label">SV (Ein bisschen)</span>
+                <span class="word">почитал</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- 11. Prozess: Vertiefen (Präfix в-) -->
+    <div class="task-card" id="t11" data-correct="NSV">
+        <div class="context-de"><span class="signal-word">Immer wenn</span> er las, vertiefte er sich tief in den Text. (Wiederholung)</div>
+        <div class="sentence-ru">Когда он читал, он всегда <span class="gap-placeholder">...</span> в текст.</div>
+        <div class="options-container">
+            <button class="aspect-btn" onclick="checkAnswer('t11', 'NSV')">
+                <span class="label">NSV</span>
+                <span class="word">вчитывался</span>
+            </button>
+            <button class="aspect-btn" onclick="checkAnswer('t11', 'SV')">
+                <span class="label">SV</span>
+                <span class="word">вчитался</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- 12. Resultat: Aufnahme (Präfix на-) -->
+    <div class="task-card" id="t12" data-correct="SV">
+        <div class="context-de">Wir haben die Nachricht <span class="signal-word">sofort</span> auf Band gesprochen. (Resultat)</div>
+        <div class="sentence-ru">Мы <span class="signal-word">сразу</span> <span class="gap-placeholder">...</span> сообщение.</div>
+        <div class="options-container">
+            <button class="aspect-btn" onclick="checkAnswer('t12', 'NSV')">
+                <span class="label">NSV</span>
+                <span class="word">начитывали</span>
+            </button>
+            <button class="aspect-btn" onclick="checkAnswer('t12', 'SV')">
+                <span class="label">SV</span>
+                <span class="word">начитали</span>
+            </button>
+        </div>
+    </div>
+
+</div>
+
+<div class="controls">
+    <button class="ctrl-btn reset" onclick="resetAll()">Zurücksetzen</button>
+    <button class="ctrl-btn solve" onclick="showSolutions()">Lösungen anzeigen</button>
+</div>
+
+<script>
+    function checkAnswer(cardId, selectedType) {
+        const card = document.getElementById(cardId);
+        
+        // Verhindern von Mehrfachklicks
+        if (card.classList.contains('answered')) return;
+
+        const correctType = card.dataset.correct;
+        const buttons = card.querySelectorAll('.aspect-btn');
+        let selectedBtn;
+
+        // Finde den geklickten Button
+        // Wir gehen über den Index oder prüfen den Aufrufparameter
+        // Einfacher: Wir schauen, welcher Button das entsprechende Label/Wort hat
+        // Da wir 'onclick' direkt im HTML haben, können wir uns auf die Reihenfolge verlassen:
+        // Button 0 ist immer NSV, Button 1 ist SV (gemäß HTML Struktur oben)
+        
+        if (selectedType === 'NSV') selectedBtn = buttons[0];
+        else selectedBtn = buttons[1];
+
+        // Karte sperren
+        card.classList.add('answered');
+
+        if (selectedType === correctType) {
+            // Richtig
+            selectedBtn.classList.add('correct');
+        } else {
+            // Falsch
+            selectedBtn.classList.add('wrong');
+            // Zeige richtige Antwort an
+            const correctBtn = (correctType === 'NSV') ? buttons[0] : buttons[1];
+            correctBtn.classList.add('correct');
+        }
+    }
+
+    function resetAll() {
+        const cards = document.querySelectorAll('.task-card');
+        cards.forEach(card => {
+            card.classList.remove('answered');
+            const buttons = card.querySelectorAll('.aspect-btn');
+            buttons.forEach(btn => {
+                btn.classList.remove('correct', 'wrong');
+            });
+        });
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function showSolutions() {
+        resetAll();
+        const cards = document.querySelectorAll('.task-card');
+        cards.forEach(card => {
+            card.classList.add('answered');
+            const correctType = card.dataset.correct;
+            const buttons = card.querySelectorAll('.aspect-btn');
+            const correctBtn = (correctType === 'NSV') ? buttons[0] : buttons[1];
+            correctBtn.classList.add('correct');
+        });
+    }
+</script>
+
+</body>
+</html>
