@@ -1,0 +1,503 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Russisch: Verben vergleichen (12 Aufgaben)</title>
+    
+    <style>
+        :root {
+            --primary: #2c3e50;
+            --accent-a: #2980b9;
+            --accent-b: #8e44ad;
+            --correct-bg: #d4edda;
+            --correct-border: #28a745;
+            --wrong-bg: #f8d7da;
+            --wrong-border: #dc3545;
+            --bg-body: #f5f7fa;
+            --card-bg: #ffffff;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-body);
+            color: #333;
+            margin: 0;
+            padding: 20px;
+            line-height: 1.5;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            color: var(--primary);
+            text-align: center;
+            margin-bottom: 10px;
+        }
+
+        .instruction {
+            text-align: center;
+            color: #555;
+            margin-bottom: 30px;
+            font-style: italic;
+        }
+
+        /* Hauptcontainer für die Karten */
+        .grid-container {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 25px;
+        }
+        
+        /* Karte */
+        .comparison-card {
+            background: var(--card-bg);
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+            border: 1px solid #e0e0e0;
+        }
+
+        /* Vergleichsboxen */
+        .comparison-area {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 20px;
+            border-bottom: 1px dashed #ccc;
+            padding-bottom: 15px;
+        }
+        
+        @media (max-width: 500px) {
+            .comparison-area { flex-direction: column; }
+        }
+
+        .sentence-box {
+            flex: 1;
+            padding: 15px;
+            border-radius: 8px;
+            border-left: 5px solid;
+            background-color: #f8f9fa;
+        }
+
+        .sentence-box-a { border-color: var(--accent-a); }
+        .sentence-box-b { border-color: var(--accent-b); }
+        
+        .box-label {
+            font-weight: bold;
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 5px;
+        }
+        
+        .label-a { color: var(--accent-a); }
+        .label-b { color: var(--accent-b); }
+
+        .sentence-ru {
+            font-size: 1.1rem;
+            font-weight: 500;
+        }
+
+        /* Frage und Optionen */
+        .question {
+            font-weight: bold;
+            color: var(--primary);
+            margin-bottom: 10px;
+        }
+
+        .options-list {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .option-btn {
+            background-color: #fff;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            padding: 12px 15px;
+            text-align: left;
+            cursor: pointer;
+            font-size: 0.95rem;
+            color: #444;
+            transition: all 0.2s;
+        }
+
+        .option-btn:hover {
+            border-color: #aaa;
+            background-color: #f9f9f9;
+        }
+
+        /* Feedback */
+        .option-btn.correct {
+            background-color: var(--correct-bg);
+            border-color: var(--correct-border);
+            color: #155724;
+            font-weight: bold;
+        }
+
+        .option-btn.wrong {
+            background-color: var(--wrong-bg);
+            border-color: var(--wrong-border);
+            color: #721c24;
+            opacity: 0.6;
+            text-decoration: line-through;
+        }
+
+        /* Deaktivierung */
+        .comparison-card.solved .option-btn {
+            pointer-events: none;
+        }
+        
+        .comparison-card.solved .option-btn:not(.correct):not(.wrong) {
+            opacity: 0.5;
+        }
+
+        /* Controls */
+        .controls {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            margin-top: 40px;
+            padding-top: 20px;
+            border-top: 1px solid #ddd;
+        }
+
+        button.ctrl-btn {
+            padding: 12px 30px;
+            border: none;
+            border-radius: 6px;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            color: white;
+            transition: transform 0.1s;
+        }
+
+        button.reset { background-color: #95a5a6; }
+        button.reset:hover { background-color: #7f8c8d; }
+
+        button.solve { background-color: #f39c12; }
+        button.solve:hover { background-color: #d35400; }
+
+        @media (max-width: 600px) {
+            .controls {
+                flex-direction: column;
+            }
+            button.ctrl-btn {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>Verben vergleichen</h1>
+    <p class="instruction">Lesen Sie die beiden Sätze. Was ist der genaue Bedeutungsunterschied? <br>Wählen Sie die korrekte Erklärung aus.</p>
+
+    <div class="grid-container">
+
+        <!-- 1. дочитать vs. прочитать -->
+        <div class="comparison-card" id="c1">
+            <div class="comparison-area">
+                <div class="sentence-box sentence-box-a">
+                    <div class="box-label label-a">A</div>
+                    <div class="sentence-ru">Я <strong>прочитал</strong> книгу.</div>
+                </div>
+                <div class="sentence-box sentence-box-b">
+                    <div class="box-label label-b">B</div>
+                    <div class="sentence-ru">Я <strong>дочитал</strong> книгу.</div>
+                </div>
+            </div>
+            <div class="question">Unterschied?</div>
+            <div class="options-list">
+                <button class="option-btn" onclick="check(this, true)">A: Ich habe das Buch (ganz) gelesen. B: Ich habe das Buch (endlich) zu Ende gelesen.</button>
+                <button class="option-btn" onclick="check(this, false)">A: Ich habe ein bisschen gelesen. B: Ich habe das Buch nochmal gelesen.</button>
+                <button class="option-btn" onclick="check(this, false)">Beide Sätze bedeuten exakt dasselbe.</button>
+            </div>
+        </div>
+
+        <!-- 2. зачитаться vs. вчитаться -->
+        <div class="comparison-card" id="c2">
+            <div class="comparison-area">
+                <div class="sentence-box sentence-box-a">
+                    <div class="box-label label-a">A</div>
+                    <div class="sentence-ru">Он <strong>зачитался</strong> и забыл о времени.</div>
+                </div>
+                <div class="sentence-box sentence-box-b">
+                    <div class="box-label label-b">B</div>
+                    <div class="sentence-ru">Он <strong>вчитался</strong> в текст.</div>
+                </div>
+            </div>
+            <div class="question">Unterschied?</div>
+            <div class="options-list">
+                <button class="option-btn" onclick="check(this, false)">A: Er hat genug gelesen. B: Er hat den Text vorgelesen.</button>
+                <button class="option-btn" onclick="check(this, true)">A: Er war vertieft (die Zeit vergessen). B: Er hat sich konzentriert, um den Sinn zu verstehen.</button>
+                <button class="option-btn" onclick="check(this, false)">A: Er hat vorgelesen. B: Er hat Fehler gefunden.</button>
+            </div>
+        </div>
+
+        <!-- 3. читать vs. почитать -->
+        <div class="comparison-card" id="c3">
+            <div class="comparison-area">
+                <div class="sentence-box sentence-box-a">
+                    <div class="box-label label-a">A</div>
+                    <div class="sentence-ru">Я <strong>читал</strong> книгу.</div>
+                </div>
+                <div class="sentence-box sentence-box-b">
+                    <div class="box-label label-b">B</div>
+                    <div class="sentence-ru">Я <strong>почитал</strong> книгу.</div>
+                </div>
+            </div>
+            <div class="question">Unterschied?</div>
+            <div class="options-list">
+                <button class="option-btn" onclick="check(this, true)">A: Ich war dabei zu lesen (Prozess). B: Ich habe eine Weile gelesen (zeitlich begrenzt).</button>
+                <button class="option-btn" onclick="check(this, false)">A: Ich habe das Buch gelesen. B: Ich habe das Buch wiedergelesen.</button>
+                <button class="option-btn" onclick="check(this, false)">A: Ich lese gerade. B: Ich werde lesen.</button>
+            </div>
+        </div>
+
+        <!-- 4. начитаться vs. зачитаться -->
+        <div class="comparison-card" id="c4">
+            <div class="comparison-area">
+                <div class="sentence-box sentence-box-a">
+                    <div class="box-label label-a">A</div>
+                    <div class="sentence-ru">Я <strong>начитался</strong> новостей.</div>
+                </div>
+                <div class="sentence-box sentence-box-b">
+                    <div class="box-label label-b">B</div>
+                    <div class="sentence-ru">Я <strong>зачитался</strong> новостями.</div>
+                </div>
+            </div>
+            <div class="question">Unterschied?</div>
+            <div class="options-list">
+                <button class="option-btn" onclick="check(this, false)">A: Ich habe die Nachrichten vorgelesen. B: Ich habe die Zeit vergessen.</button>
+                <button class="option-btn" onclick="check(this, true)">A: Ich habe genug davon (sattgelesen/negativ). B: Ich war fasziniert (positiv/vertieft).</button>
+                <button class="option-btn" onclick="check(this, false)">A: Ich habe die Nachrichten aufgesprochen. B: Ich habe mich konzentriert.</button>
+            </div>
+        </div>
+
+        <!-- 5. вычитать vs. перечитать -->
+        <div class="comparison-card" id="c5">
+            <div class="comparison-area">
+                <div class="sentence-box sentence-box-a">
+                    <div class="box-label label-a">A</div>
+                    <div class="sentence-ru">Мне нужно <strong>вычитать</strong> текст.</div>
+                </div>
+                <div class="sentence-box sentence-box-b">
+                    <div class="box-label label-b">B</div>
+                    <div class="sentence-ru">Мне нужно <strong>перечитать</strong> текст.</div>
+                </div>
+            </div>
+            <div class="question">Unterschied?</div>
+            <div class="options-list">
+                <button class="option-btn" onclick="check(this, true)">A: Ich muss den Text auf Fehler prüfen. B: Ich muss den Text noch einmal lesen (ohne Fehlerfokus).</button>
+                <button class="option-btn" onclick="check(this, false)">A: Ich muss den Text vorlesen. B: Ich muss den Text wiedervorlesen.</button>
+                <button class="option-btn" onclick="check(this, false)">A: Ich muss den Text zu Ende lesen. B: Ich muss ihn ganz lesen.</button>
+            </div>
+        </div>
+        
+        <!-- 6. зачитать vs. прочитать -->
+        <div class="comparison-card" id="c6">
+            <div class="comparison-area">
+                <div class="sentence-box sentence-box-a">
+                    <div class="box-label label-a">A</div>
+                    <div class="sentence-ru">Президент <strong>зачитал</strong> указ.</div>
+                </div>
+                <div class="sentence-box sentence-box-b">
+                    <div class="box-label label-b">B</div>
+                    <div class="sentence-ru">Президент <strong>прочитал</strong> указ.</div>
+                </div>
+            </div>
+            <div class="question">Unterschied?</div>
+            <div class="options-list">
+                <button class="option-btn" onclick="check(this, false)">A: Er hat den Erlass zu Ende gelesen. B: Er hat den Erlass durchgelesen.</button>
+                <button class="option-btn" onclick="check(this, false)">A: Er hat den Erlass studiert. B: Er hat den Erlass gelesen.</button>
+                <button class="option-btn" onclick="check(this, true)">A: Er hat ihn offiziell verkündet (vorgelesen). B: Er hat ihn (für sich) gelesen.</button>
+            </div>
+        </div>
+
+        <!-- 7. начитать vs. прочитать (NEU) -->
+        <div class="comparison-card" id="c7">
+            <div class="comparison-area">
+                <div class="sentence-box sentence-box-a">
+                    <div class="box-label label-a">A</div>
+                    <div class="sentence-ru">Он <strong>начитал</strong> текст на диктофон.</div>
+                </div>
+                <div class="sentence-box sentence-box-b">
+                    <div class="box-label label-b">B</div>
+                    <div class="sentence-ru">Он <strong>прочитал</strong> текст.</div>
+                </div>
+            </div>
+            <div class="question">Unterschied?</div>
+            <div class="options-list">
+                <button class="option-btn" onclick="check(this, true)">A: Er hat den Text aufgesprochen/aufgenommen. B: Er hat den Text gelesen.</button>
+                <button class="option-btn" onclick="check(this, false)">A: Er hat den Text vorgelesen. B: Er hat den Text abgeschrieben.</button>
+                <button class="option-btn" onclick="check(this, false)">A: Er hat genug gelesen. B: Er hat alles gelesen.</button>
+            </div>
+        </div>
+
+        <!-- 8. отчитать vs. зачитать (NEU) -->
+        <div class="comparison-card" id="c8">
+            <div class="comparison-area">
+                <div class="sentence-box sentence-box-a">
+                    <div class="box-label label-a">A</div>
+                    <div class="sentence-ru">Отец <strong>отчитал</strong> сына.</div>
+                </div>
+                <div class="sentence-box sentence-box-b">
+                    <div class="box-label label-b">B</div>
+                    <div class="sentence-ru">Отец <strong>зачитал</strong> письмо.</div>
+                </div>
+            </div>
+            <div class="question">Unterschied?</div>
+            <div class="options-list">
+                <button class="option-btn" onclick="check(this, false)">A: Er hat ihm vorgelesen. B: Er hat ihm geschrieben.</button>
+                <button class="option-btn" onclick="check(this, true)">A: Er hat ihn ausgeschimpft. B: Er hat etwas laut vorgelesen.</button>
+                <button class="option-btn" onclick="check(this, false)">A: Er hat ihm zu Ende gelesen. B: Er hat sich festgelesen.</button>
+            </div>
+        </div>
+
+        <!-- 9. считывать vs. читать (NEU) -->
+        <div class="comparison-card" id="c9">
+            <div class="comparison-area">
+                <div class="sentence-box sentence-box-a">
+                    <div class="box-label label-a">A</div>
+                    <div class="sentence-ru">Компьютер <strong>считывает</strong> данные.</div>
+                </div>
+                <div class="sentence-box sentence-box-b">
+                    <div class="box-label label-b">B</div>
+                    <div class="sentence-ru">Студент <strong>читает</strong> данные.</div>
+                </div>
+            </div>
+            <div class="question">Unterschied?</div>
+            <div class="options-list">
+                <button class="option-btn" onclick="check(this, true)">A: Technisches Einlesen/Scannen. B: Menschliches Lesen/Verstehen.</button>
+                <button class="option-btn" onclick="check(this, false)">A: Der Computer rechnet. B: Der Student lernt.</button>
+                <button class="option-btn" onclick="check(this, false)">A: Vergleichen von Texten. B: Lautes Vorlesen.</button>
+            </div>
+        </div>
+
+        <!-- 10. вчитаться vs. зачитаться (NEU) -->
+        <div class="comparison-card" id="c10">
+            <div class="comparison-area">
+                <div class="sentence-box sentence-box-a">
+                    <div class="box-label label-a">A</div>
+                    <div class="sentence-ru">Я <strong>вчитался</strong> в документ.</div>
+                </div>
+                <div class="sentence-box sentence-box-b">
+                    <div class="box-label label-b">B</div>
+                    <div class="sentence-ru">Я <strong>зачитался</strong> романом.</div>
+                </div>
+            </div>
+            <div class="question">Unterschied?</div>
+            <div class="options-list">
+                <button class="option-btn" onclick="check(this, false)">A: Ich habe den Text überflogen. B: Ich habe den Text studiert.</button>
+                <button class="option-btn" onclick="check(this, false)">A: Ich habe fertig gelesen. B: Ich habe angefangen zu lesen.</button>
+                <button class="option-btn" onclick="check(this, true)">A: Ich habe tief analysiert (Fokus). B: Ich war emotional gefesselt (Zeitverlust).</button>
+            </div>
+        </div>
+
+        <!-- 11. перечитать vs. дочитать (NEU) -->
+        <div class="comparison-card" id="c11">
+            <div class="comparison-area">
+                <div class="sentence-box sentence-box-a">
+                    <div class="box-label label-a">A</div>
+                    <div class="sentence-ru">Нужно <strong>перечитать</strong> главу.</div>
+                </div>
+                <div class="sentence-box sentence-box-b">
+                    <div class="box-label label-b">B</div>
+                    <div class="sentence-ru">Нужно <strong>дочитать</strong> главу.</div>
+                </div>
+            </div>
+            <div class="question">Unterschied?</div>
+            <div class="options-list">
+                <button class="option-btn" onclick="check(this, true)">A: Wiederholung (noch einmal). B: Abschluss (bis zum Ende).</button>
+                <button class="option-btn" onclick="check(this, false)">A: Korrektur lesen. B: Ein bisschen lesen.</button>
+                <button class="option-btn" onclick="check(this, false)">A: Laut lesen. B: Leise lesen.</button>
+            </div>
+        </div>
+
+        <!-- 12. почитать vs. прочитать (NEU) -->
+        <div class="comparison-card" id="c12">
+            <div class="comparison-area">
+                <div class="sentence-box sentence-box-a">
+                    <div class="box-label label-a">A</div>
+                    <div class="sentence-ru">Я <strong>почитаю</strong> журнал.</div>
+                </div>
+                <div class="sentence-box sentence-box-b">
+                    <div class="box-label label-b">B</div>
+                    <div class="sentence-ru">Я <strong>прочитаю</strong> журнал.</div>
+                </div>
+            </div>
+            <div class="question">Unterschied?</div>
+            <div class="options-list">
+                <button class="option-btn" onclick="check(this, false)">A: Ich lese regelmäßig. B: Ich lese jetzt.</button>
+                <button class="option-btn" onclick="check(this, true)">A: Ich lese ein bisschen (Zeitvertreib). B: Ich lese ihn ganz durch (Resultat).</button>
+                <button class="option-btn" onclick="check(this, false)">A: Ich werde lesen. B: Ich habe gelesen.</button>
+            </div>
+        </div>
+        
+    </div>
+    <div class="controls">
+        <button class="ctrl-btn reset" onclick="resetAll()">Zurücksetzen</button>
+        <button class="ctrl-btn solve" onclick="showSolutions()">Lösungen anzeigen</button>
+    </div>
+</div>
+
+<script>
+    function check(btn, isCorrect) {
+        const card = btn.closest('.comparison-card');
+        
+        if (card.classList.contains('solved')) return;
+
+        if (isCorrect) {
+            btn.classList.add('correct');
+            card.classList.add('solved');
+        } else {
+            btn.classList.add('wrong');
+            // Karte sperren und Lösung zeigen
+            card.classList.add('solved');
+            
+            // Richtige Antwort finden
+            const allBtns = card.querySelectorAll('.option-btn');
+            allBtns.forEach(b => {
+                if(b.getAttribute('onclick').includes('true')) {
+                    b.classList.add('correct');
+                }
+            });
+        }
+    }
+
+    function resetAll() {
+        const cards = document.querySelectorAll('.comparison-card');
+        cards.forEach(card => {
+            card.classList.remove('solved');
+            const btns = card.querySelectorAll('.option-btn');
+            btns.forEach(b => {
+                b.classList.remove('correct', 'wrong');
+            });
+        });
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function showSolutions() {
+        resetAll();
+        const cards = document.querySelectorAll('.comparison-card');
+        cards.forEach(card => {
+            card.classList.add('solved');
+            const btns = card.querySelectorAll('.option-btn');
+            btns.forEach(b => {
+                if(b.getAttribute('onclick').includes('true')) {
+                    b.classList.add('correct');
+                }
+            });
+        });
+    }
+</script>
+
+</body>
+</html>
